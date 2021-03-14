@@ -146,5 +146,9 @@
 
   </Target>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetPath) &quot;..\exe&quot;" />
+  </Target>
+
 
 </Project>
