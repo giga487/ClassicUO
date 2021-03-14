@@ -104,13 +104,13 @@ namespace ClassicUO.Game.UI.Gumps
                 new [] {1, (int) Buttons.VendorSearch },
                 new [] {0, (int) Buttons.UOMarsBible },
                 new [] {0, (int) Buttons.UOMarsForum },
-                //new [] {0, (int) Buttons.Debug },
+                new [] {0, (int) Buttons.Debug }
                 //new [] {1, (int) Buttons.GlobalChat },
             };
 
             string[] texts =
             {
-                ResGumps.WorldMap, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, "Vendor Search", "UO Bible", "Forum"
+                ResGumps.WorldMap, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, "Vendor Search", "UO Bible", "Forum", "FPS"
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
