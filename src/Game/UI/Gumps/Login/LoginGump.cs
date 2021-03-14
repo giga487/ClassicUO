@@ -425,7 +425,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     false,
                     false,
                     false,
-                    "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.classicuo.eu\">Website",
+                    "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://uomars.it\">Website", /*giga487, modifica al sito di riferimento */
                     0x32,
                     true,
                     isunicode: true,

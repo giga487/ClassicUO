@@ -387,16 +387,16 @@ Hue: {1}</value>
     <value>Your Ultima Online directory seems to be invalid.
 Download the official Launcher to setup and run your game.
 
-Link: classicuo.eu</value>
+Invalid server setup in settings.json</value>
   </data>
   <data name="YourUOClientVersionIsInvalid" xml:space="preserve">
     <value>Your Ultima Online client version seems to be invalid.
 Download the official Launcher to setup and run your game.
 
-Link: classicuo.eu</value>
+Invalid client executable</value>
   </data>
   <data name="ClassicUOLink" xml:space="preserve">
-    <value>https://classicuo.eu</value>
+    <value>https://uomars.it</value>
   </data>
   <data name="ItBeginsToRain" xml:space="preserve">
     <value>It begins to rain.</value>
