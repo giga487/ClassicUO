@@ -750,7 +750,7 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == ScanTypeObject.Hostile)
                         {
-                            if (mobile.NotorietyFlag == NotorietyFlag.Ally || mobile.NotorietyFlag == NotorietyFlag.Innocent || mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            if(mobile.NotorietyFlag == NotorietyFlag.Ally ||  mobile.NotorietyFlag == NotorietyFlag.Invulnerable || Party.Contains(mobile)) /* Giga487 */
                             {
                                 continue;
                             }

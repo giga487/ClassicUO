@@ -166,6 +166,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
+            /*  tolta la selezione degli umani */
+            /*
             // Races
             Add
             (
@@ -229,6 +231,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 _gargoyleRadio.ValueChanged += Race_ValueChanged;
             }
+            */
 
             // Prev/Next
             Add
@@ -250,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             );
 
             _maleRadio.IsChecked = true;
-            _humanRadio.IsChecked = true;
+            //_humanRadio.IsChecked = true; /* giga487, ho tolto la selezione della razza, quindi ho dovuto unflaggare questo */
         }
 
         private void CreateCharacter(bool isFemale, RaceType race)
@@ -753,7 +756,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private RaceType GetSelectedRace()
         {
-            if (_humanRadio.IsChecked)
+            if (_humanRadio != null && _humanRadio.IsChecked)
             {
                 return RaceType.HUMAN;
             }

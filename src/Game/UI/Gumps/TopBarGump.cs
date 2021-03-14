@@ -92,29 +92,25 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 largeWidth = th2.Width;
             }
-
+            /* Giga487 */
             int[][] textTable =
             {
-                new[] { 0, (int) Buttons.Map },
-                new[] { 1, (int) Buttons.Paperdoll },
-                new[] { 1, (int) Buttons.Inventory },
-                new[] { 1, (int) Buttons.Journal },
-                new[] { 0, (int) Buttons.Chat },
-                new[] { 0, (int) Buttons.Help },
-                new[] { 1, (int) Buttons.WorldMap },
-                new[] { 0, (int) Buttons.Info },
-                new[] { 0, (int) Buttons.Debug },
-                new[] { 1, (int) Buttons.NetStats },
-
-                new[] { 1, (int) Buttons.UOStore },
-                new[] { 1, (int) Buttons.GlobalChat }
+                new [] {1, (int) Buttons.WorldMap },
+                new [] {1, (int) Buttons.Paperdoll },
+                new [] {1, (int) Buttons.Inventory },
+                new [] {1, (int) Buttons.Journal },
+                new [] {0, (int) Buttons.Chat },
+                //new [] {0, (int) Buttons.Help },
+                new [] {1, (int) Buttons.VendorSearch },
+                new [] {0, (int) Buttons.UOMarsBible },
+                new [] {0, (int) Buttons.UOMarsForum },
+                //new [] {0, (int) Buttons.Debug },
+                //new [] {1, (int) Buttons.GlobalChat },
             };
 
             string[] texts =
             {
-                ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help,
-                ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore,
-                ResGumps.GlobalChat
+                ResGumps.WorldMap, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, "Vendor Search", "UO Bible", "Forum"
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
@@ -141,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startX = 30;
 
-            for (int i = 0; i < textTable.Length; i++)
+            for (int i = 0; i < texts.Length; i++)
             {
                 if (!hasUOStore && i >= (int) Buttons.UOStore)
                 {
@@ -324,6 +320,16 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.OpenWorldMap();
 
                     break;
+
+                case Buttons.VendorSearch:
+                    GameActions.Say(".vendorsearch");
+                    break;
+                case Buttons.UOMarsBible:
+                    System.Diagnostics.Process.Start("https://uomars.it/bible");
+                    break;
+                case Buttons.UOMarsForum:
+                    System.Diagnostics.Process.Start("https://forum.uomars.it");
+                    break;
             }
         }
 
@@ -339,8 +345,11 @@ namespace ClassicUO.Game.UI.Gumps
             Info,
             Debug,
             NetStats,
-            UOStore,
-            GlobalChat
+            GlobalChat,
+            VendorSearch,
+            UOMarsBible,
+            UOMarsForum,
+            UOStore            
         }
 
         private class RighClickableButton : Button
