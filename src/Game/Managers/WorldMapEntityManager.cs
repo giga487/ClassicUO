@@ -36,6 +36,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility.Logging;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
@@ -150,6 +151,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
+
             if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
@@ -159,6 +161,16 @@ namespace ClassicUO.Game.Managers
                     IsGuild = isguild,
                     Name = name
                 };
+
+                /* giga487 - hurricane */
+                foreach (var e in World.Party.Members)
+                {
+                    if (e.Serial == serial)
+                    {
+                        entity.Name = e.Name;
+                        break;
+                    }
+                }
 
                 Entities[serial] = entity;
             }
@@ -171,10 +183,11 @@ namespace ClassicUO.Game.Managers
                 entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
 
-                if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
+/*                if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
                 {
                     entity.Name = name;
                 }
+*/
             }
         }
 
@@ -248,10 +261,13 @@ namespace ClassicUO.Game.Managers
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
                             Mobile mob = World.Mobiles.Get(e.Serial);
+                            Console.WriteLine(String.Format("Vedo {0}", e.Name));
 
                             if (mob == null || mob.Distance > World.ClientViewRange)
                             {
+                                //NetClient.Socket.Send(new PQueryPartyPosition());
                                 NetClient.Socket.Send(new PQueryPartyPosition());
+
 
                                 break;
                             }

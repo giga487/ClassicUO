@@ -135,6 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string name = "";
 
+                /* Giga487 */
                 if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
                 {
                     name = World.Party.Members[i].Name;
