@@ -122,6 +122,7 @@ namespace ClassicUO.Game.Managers
                         name[i] = p.ReadUnicode();
                     }
 
+
                     for (int i = 0; i < count; i++)
                     {
                         uint serial = p.ReadUInt();
@@ -250,6 +251,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
+        char[] charNonVedere = {'\0'};
         public string GetName(uint serial)
         {
             if(Contains(serial))
@@ -258,12 +260,12 @@ namespace ClassicUO.Game.Managers
                 {
                     if (e.Serial == serial)
                     {
-                        return e.Name;
+                        return e.Name.Replace("\0", string.Empty); /* questo perchè la stringa termina con Null, l'ho eliminato */
                     }
                 }
             }
 
-            return "WHO?"; /* giga487, vuol dire che l'elemento che esiste, non esiste */
+            return ""; /* giga487, vuol dire che l'elemento che esiste, non esiste */
         }
 
         public void Clear()

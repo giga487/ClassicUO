@@ -181,13 +181,7 @@ namespace ClassicUO.Game.Managers
                 }
 
             }
-
-            /*            if (!string.IsNullOrEmpty(World.Party.GetName(serial)))
-                        {
-                            entity.Name = World.Party.GetName(serial);
-                        }
-            */
-
+    
             entity.Name = World.Party.GetName(serial); /* giga487 */
 
         }
