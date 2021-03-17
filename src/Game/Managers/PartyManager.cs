@@ -115,10 +115,18 @@ namespace ClassicUO.Game.Managers
 
                     bool remove_all = !add && to_remove == World.Player;
                     int done = 0;
+                    string[] name = new string[count];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        name[i] = p.ReadUnicode();
+                    }
 
                     for (int i = 0; i < count; i++)
                     {
                         uint serial = p.ReadUInt();
+
+
                         bool remove = !add && serial == to_remove;
 
                         if (remove && serial == to_remove && i == 0)
@@ -130,7 +138,18 @@ namespace ClassicUO.Game.Managers
                         {
                             if (!Contains(serial))
                             {
-                                Members[i] = new PartyMember(serial);
+                                /* qui viene generato l'elemento del party iniziale
+                                 * inizializzato dal party member tramite seriale
+                                 * quindi chi assegna il nome? il costruttore di PartyMember,
+                                 * il byte che viene letto è il [4] che è il subcommands di
+                                 * http://docs.polserver.com/packets/index.php?Packet=0xBF&Sort=1
+                                 * e quindi, il [5] è 1 perchè siamo in add member.
+                                 * 4 byte per il seriale, 7 8 9 10. Non viene passato il nome */
+
+                                Members[i] = new PartyMember(serial, name[i]); /* giga487 */
+                                //Members[i] = new PartyMember(serial);
+
+
                             }
 
                             done++;
@@ -178,9 +197,10 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case 3:
-                case 4:
+                case 4: /* questo è il messaggio di chat */
                     uint ser = p.ReadUInt();
-                    string name = p.ReadUnicode();
+                    byte[] buff = p.Buffer;
+                    string text_mex = p.ReadUnicode();  /* è il messaggio, non il nome. */
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
@@ -189,7 +209,7 @@ namespace ClassicUO.Game.Managers
                             MessageManager.HandleMessage
                             (
                                 null,
-                                name,
+                                text_mex,
                                 Members[i].Name,
                                 ProfileManager.CurrentProfile.PartyMessageHue,
                                 MessageType.Party,
@@ -230,6 +250,22 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
+        public string GetName(uint serial)
+        {
+            if(Contains(serial))
+            {
+                foreach (var e in World.Party.Members)
+                {
+                    if (e.Serial == serial)
+                    {
+                        return e.Name;
+                    }
+                }
+            }
+
+            return "WHO?"; /* giga487, vuol dire che l'elemento che esiste, non esiste */
+        }
+
         public void Clear()
         {
             Leader = 0;
@@ -252,6 +288,13 @@ namespace ClassicUO.Game.Managers
             _name = Name;
         }
 
+        public PartyMember(uint serial, string name)
+        {
+            Serial = serial;
+            _name = name;
+        }
+
+        /* questa funzione restituisce i nomi mobiles */
         public string Name
         {
             get

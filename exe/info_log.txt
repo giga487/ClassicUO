@@ -1,0 +1,9 @@
+
+
+15/03 Giga487:
+
+Modifiche varie del codice relativi ad alcuni indirizzi inseriti nel client.
+Sono stati inseriti all'interno del codice modifiche relative al vecchio client non generato da Giga487.
+Ho quindi preso lo stato attuale del client dal git ed ho implementato le modifiche passate.
+Eliminata la scelta delle razze alla creazione del personaggio.
+Corretta la scritta <out-of-bounds> sulla mappa quando si raggiunge una distanza > 25 tile.
