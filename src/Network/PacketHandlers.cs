@@ -213,6 +213,11 @@ namespace ClassicUO.Network
             Handlers.Add(0x82, ReceiveLoginRejection);
             Handlers.Add(0x85, ReceiveLoginRejection);
             Handlers.Add(0x53, ReceiveLoginRejection);
+
+            //UO Mars reader
+            Handlers.Add(MARS, UoMarsPackets)
+
+
         }
 
 
@@ -5437,6 +5442,45 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PRazorAnswer());
 
                     break;
+            }
+        }
+        
+        #define MARS 0xFF
+        #define GUILD 0x01
+        #define LETTURA_MEMBRI 0x01
+
+        private static void UoMarsPackets(ref PacketBufferReader p)
+        {
+            byte type = p.ReadByte();
+            byte message_id = p.ReadByte();
+            if(p.ID != MARS)
+            {
+                return -1;
+            }
+
+
+            switch(type)
+            {
+                /* questo messaggio avviene solo quando un player fa login. */
+                case GUILD: 
+
+                    switch(message_id)
+                    {
+                        byte count_member = p.ReadByte();
+
+                        string[] name = new string[count_member];
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            name[i] = p.ReadUnicode();
+                        }
+                    }
+                    
+
+
+
+
+
             }
         }
 
