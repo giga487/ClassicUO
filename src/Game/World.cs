@@ -38,6 +38,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.UoMars;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game
@@ -65,7 +66,7 @@ namespace ClassicUO.Game
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
         public static PartyManager Party { get; } = new PartyManager();
-
+        public static GuildManager Guild  { get; } = new GuildManager();
         public static HouseManager HouseManager { get; } = new HouseManager();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();

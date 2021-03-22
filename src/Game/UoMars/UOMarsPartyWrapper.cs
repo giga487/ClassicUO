@@ -7,23 +7,11 @@ using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game.UoMars
 {
-    class UOMarsPartyWrapper: PartyManager
+    class UOMars
     {
-
-        public string GetName(uint serial)
+        public UOMars()
         {
-            if (Contains(serial))
-            {
-                foreach (var e in World.Party.Members)
-                {
-                    if (e.Serial == serial)
-                    {
-                        return e.Name;
-                    }
-                }
-            }
 
-            return "errore incomprensibile"; /* giga487, vuol dire che l'elemento che esiste, non esiste */
         }
     }
 }

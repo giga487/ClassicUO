@@ -36,10 +36,12 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Game.UoMars;
 
 
 namespace ClassicUO.Game.Managers
 {
+    
     internal class WMapEntity
     {   
         public WMapEntity(uint serial)
@@ -183,7 +185,7 @@ namespace ClassicUO.Game.Managers
             }
     
             entity.Name = World.Party.GetName(serial); /* giga487 */
-
+            //entity.Name = World.Guild.GetName(serial);
         }
 
         public void Remove(uint serial)

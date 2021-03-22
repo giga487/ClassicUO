@@ -50,6 +50,8 @@ using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.UoMars;
+
 
 namespace ClassicUO.Network
 {
@@ -213,9 +215,6 @@ namespace ClassicUO.Network
             Handlers.Add(0x82, ReceiveLoginRejection);
             Handlers.Add(0x85, ReceiveLoginRejection);
             Handlers.Add(0x53, ReceiveLoginRejection);
-
-            //UO Mars reader
-            Handlers.Add(MARS, UoMarsPackets)
 
 
         }
@@ -4074,7 +4073,14 @@ namespace ClassicUO.Network
                     World.Party.ParsePacket(ref p);
 
                     break;
+/*
+                // Messaggio 0xBF 0xD7 0 COUNT NOME SERIALE, NOME SERIALE, NOME SERIALE,, aggiun
+                // Messaggio 0xBF 0xD7 1 Seriale N
+                case 0xD7: //guild member Giga487
+                    World.Guild.ParsePacket(ref p);
 
+                    break;
+*/
                 //===========================================================================================
                 //===========================================================================================
                 case 8: // map change
@@ -5383,7 +5389,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
         }
 
-        private static void KrriosClientSpecial(ref PacketBufferReader p)
+        private static void KrriosClientSpecial(ref PacketBufferReader p) // 0xF0
         {
             byte type = p.ReadByte();
 
@@ -5411,6 +5417,9 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             int hits = type == 1 ? 0 : p.ReadByte();
 
+                            /* giga487, inserisce qui l'insieme degli elementi */
+                            World.Guild.AddMember(p.ReadUnicode(), p.ReadUInt());
+
                             World.WMapManager.AddOrUpdate
                             (
                                 serial,
@@ -5422,6 +5431,7 @@ namespace ClassicUO.Network
                                 null,
                                 true
                             );
+
                         }
                     }
 
@@ -5444,45 +5454,7 @@ namespace ClassicUO.Network
                     break;
             }
         }
-        
-        #define MARS 0xFF
-        #define GUILD 0x01
-        #define LETTURA_MEMBRI 0x01
 
-        private static void UoMarsPackets(ref PacketBufferReader p)
-        {
-            byte type = p.ReadByte();
-            byte message_id = p.ReadByte();
-            if(p.ID != MARS)
-            {
-                return -1;
-            }
-
-
-            switch(type)
-            {
-                /* questo messaggio avviene solo quando un player fa login. */
-                case GUILD: 
-
-                    switch(message_id)
-                    {
-                        byte count_member = p.ReadByte();
-
-                        string[] name = new string[count_member];
-
-                        for (int i = 0; i < count; i++)
-                        {
-                            name[i] = p.ReadUnicode();
-                        }
-                    }
-                    
-
-
-
-
-
-            }
-        }
 
         private static void FreeshardListR(ref PacketBufferReader p)
         {
