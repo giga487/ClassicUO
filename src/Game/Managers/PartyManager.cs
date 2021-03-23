@@ -37,29 +37,31 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using System.Linq;
 
 namespace ClassicUO.Game.Managers
 {
     internal class PartyManager
     {
         private const int PARTY_SIZE = 10;
-        private uint ActualMembers { get; set; }
         public uint Leader { get; set; }
         public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
         public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
 
+        uint actualIndex = 0;
+        public void AddMember(string name, uint serial)
+        {
+            if(!Contains(serial) && actualIndex < 10)
+            {
+                Members[actualIndex] = new PartyMember(serial, name);
+                actualIndex++;
+            }
+        }
 
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
-
-        public void AddMember(string memberName, uint serialM)
-        {
-            if(!Contains(serialM))
-                Members[ActualMembers++] = new PartyMember(serialM, memberName); /* giga487 */
-
-        }
 
         public void ParsePacket(ref PacketBufferReader p)
         {
@@ -154,11 +156,8 @@ namespace ClassicUO.Game.Managers
                                  * e quindi, il [5] è 1 perchè siamo in add member.
                                  * 4 byte per il seriale, 7 8 9 10. Non viene passato il nome */
 
-                                //Members[i] = new PartyMember(serial, name[i]); /* giga487 */
-                                Members[i] = new PartyMember(serial);
-                                ActualMembers++;
-
-
+                                Members[i] = new PartyMember(serial, name[i]); /* giga487 */
+                                //Members[i] = new PartyMember(serial);
                             }
 
                             done++;

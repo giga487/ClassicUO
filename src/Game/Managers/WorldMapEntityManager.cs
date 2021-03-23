@@ -186,12 +186,21 @@ namespace ClassicUO.Game.Managers
 
             }
 
-            /*
+            if(entity.IsGuild)
+            {
+                World.Guild.AddMember(name, serial);
+            }
+            else 
+            {
+                World.Party.AddMember(name, serial);
+            }
+            //World.Party.AddMember(name, serial);
+
             bool inParty = World.Party.Contains(serial);
             bool inGuild = World.Guild.Contains(serial);
 
             entity.Name = inGuild ? World.Guild.GetName(serial) : World.Party.GetName(serial);
-            */
+            
             //entity.Name = World.Guild.GetName(serial);
         }
 

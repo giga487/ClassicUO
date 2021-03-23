@@ -1690,6 +1690,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showPartyMembers)
             {
+
                 for (int i = 0; i < 10; i++)
                 {
                     PartyMember partyMember = World.Party.Members[i];
