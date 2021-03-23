@@ -5393,6 +5393,7 @@ namespace ClassicUO.Network
         {
             byte type = p.ReadByte();
 
+            p.Buffer;
             switch (type)
             {
                 case 0x00: // accepted
@@ -5415,10 +5416,15 @@ namespace ClassicUO.Network
                             ushort x = p.ReadUShort();
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
+
+                            string name = p.ReadUnicode();
+                            /* giga487, inserisce qui l'insieme degli elementi */
+                            World.Guild.AddMember(name, serial);
+                            World.Party.AddMember(name, serial);
+
                             int hits = type == 1 ? 0 : p.ReadByte();
 
-                            /* giga487, inserisce qui l'insieme degli elementi */
-                            World.Guild.AddMember(p.ReadUnicode(), p.ReadUInt());
+
 
                             World.WMapManager.AddOrUpdate
                             (
@@ -5428,9 +5434,9 @@ namespace ClassicUO.Network
                                 hits,
                                 map,
                                 type == 0x02,
-                                null,
+                                World.Guild.GetName(serial),
                                 true
-                            );
+                            ); ;
 
                         }
                     }

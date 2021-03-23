@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int yPtr = 48;
 
-            PartyMember[] mem = World.Party.Members;
+            PartyManager mem = World.Party;
 
             for (int i = 0; i < 10; i++)
             {
@@ -138,6 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
                 string name = ""; /* questo è un parametro di default, in pratica */
 
                 /* Giga487 */
+                var e = World.Party.Members[i];
 
                 if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
                 {

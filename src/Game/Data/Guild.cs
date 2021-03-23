@@ -31,9 +31,17 @@ namespace ClassicUO.Game.Managers
             guildMem = new List<GuildMember>();
             counterMember = counter;
         }
+
+        public bool Contains(uint serialM)
+        {
+            if (guildMem.Any(r => r.serial == serialM))
+                return true;
+            else
+                return false;
+        }
         public void AddMember(string memberName, uint serialM)
         {
-            if(guildMem.Any(r => r.serial == serialM))    
+            if(!guildMem.Any(r => r.serial == serialM))    
                 guildMem.Add(new GuildMember {name = memberName, serial = serialM });
         }
 
