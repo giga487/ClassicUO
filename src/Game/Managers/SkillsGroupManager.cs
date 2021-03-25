@@ -263,7 +263,8 @@ namespace ClassicUO.Game.Managers
                     {
                         foreach (XmlElement xmlIds in xmlIdsRoot.GetElementsByTagName("skill"))
                         {
-                            g.Add(byte.Parse(xmlIds.GetAttribute("id")));
+                            var auto = byte.Parse(xmlIds.GetAttribute("id"));
+                            g.Add(auto);
                         }
                     }
 
@@ -305,6 +306,7 @@ namespace ClassicUO.Game.Managers
 
             if (!LoadMULFile(UOFileManager.GetUOFilePath("skillgrp.mul")))
             {
+                MakeDefaultWorkerSkills();
                 MakeDefaultMiscellaneous();
                 MakeDefaultCombat();
                 MakeDefaultTradeSkills();
@@ -382,6 +384,43 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
+        /* GRUPPI SKILLS UO MARS */
+        private static void MakeDefaultWorkerSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Worker";
+            g.Add(0);
+            g.Add(35);
+            g.Add(7);
+            g.Add(8);
+            g.Add(11);
+            g.Add(19);
+            g.Add(29);
+            g.Add(45);
+            g.Add(52);
+            g.Add(34);
+            g.Add(37);
+        }
+
+        private static void Aggressive()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Aggressive";
+            g.Add(1);
+            g.Add(31);
+            g.Add(51);
+            g.Add(16);
+            g.Add(42);
+            g.Add(19);
+            g.Add(41);
+            g.Add(25);
+            g.Add(30);
+            g.Add(40);
+            g.Add(27);
+        }
+
+
+
         private static void MakeDefaultTradeSkills()
         {
             SkillsGroup g = new SkillsGroup();
@@ -396,6 +435,7 @@ namespace ClassicUO.Game.Managers
             g.Add(45);
             g.Add(34);
             g.Add(37);
+            g.Add(58);
 
             Add(g);
         }
