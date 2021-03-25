@@ -306,7 +306,13 @@ namespace ClassicUO.Game.Managers
 
             if (!LoadMULFile(UOFileManager.GetUOFilePath("skillgrp.mul")))
             {
+                /*
+                MakeDefaultAggressiveSkills();
+                MakeDefaultDefensiveSkills();
                 MakeDefaultWorkerSkills();
+                MakeDefaultUtilitieSkills();
+                */
+
                 MakeDefaultMiscellaneous();
                 MakeDefaultCombat();
                 MakeDefaultTradeSkills();
@@ -314,6 +320,7 @@ namespace ClassicUO.Game.Managers
                 MakeDefaultWilderness();
                 MakeDefaultThieving();
                 MakeDefaultBard();
+
             }
 
             foreach (SkillsGroup g in Groups)
@@ -332,9 +339,9 @@ namespace ClassicUO.Game.Managers
             g.Add(6);
             g.Add(10);
             g.Add(12);
-            g.Add(19);
-            g.Add(3);
-            g.Add(36);
+            g.Add(19); // Herding?
+            g.Add(3);  // Item ID
+            g.Add(36); //Tinkering
 
             Add(g);
         }
@@ -345,7 +352,6 @@ namespace ClassicUO.Game.Managers
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Combat;
-            g.Add(1);
             g.Add(31);
             g.Add(42);
             g.Add(17);
@@ -393,16 +399,19 @@ namespace ClassicUO.Game.Managers
             g.Add(35);
             g.Add(7);
             g.Add(8);
-            g.Add(11);
-            g.Add(19);
+            g.Add(11); //Carpentry
+            g.Add(51); // Harvestring
+            g.Add(43); // Lumberjacking
             g.Add(29);
             g.Add(45);
             g.Add(52);
             g.Add(34);
             g.Add(37);
+
+            Add(g);
         }
 
-        private static void Aggressive()
+        private static void MakeDefaultAggressiveSkills()
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = "Aggressive";
@@ -417,6 +426,45 @@ namespace ClassicUO.Game.Managers
             g.Add(30);
             g.Add(40);
             g.Add(27);
+
+            Add(g);
+        }
+
+        private static void MakeDefaultUtilitieSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Utilities";
+            g.Add(2);
+            g.Add(15);
+            g.Add(49);
+            g.Add(23);
+            g.Add(24); //lockpicking
+            g.Add(46); //Med
+            g.Add(29); // Musicianship
+            g.Add(9);
+            g.Add(22);
+            g.Add(28);
+            g.Add(33);
+            g.Add(56);
+            g.Add(38);
+            g.Add(39);
+
+            Add(g);
+        }
+
+        private static void MakeDefaultDefensiveSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Defensive";
+            g.Add(14);
+            g.Add(42);
+            g.Add(21);
+            g.Add(41); //Parry
+            g.Add(51);
+            g.Add(47); //Stealth
+            g.Add(43);
+
+            Add(g);
         }
 
 

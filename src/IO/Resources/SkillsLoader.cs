@@ -54,7 +54,7 @@ namespace ClassicUO.IO.Resources
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
 
-        string[] skillUseless = { "Bushido", "Ninjitsu", "Spellweaving", "Disarm", "Enticement", "Chivalry", "Necromancy", "Throwing", "Fishing", "Mysticism","Imbuing"};
+        string[] skillUseless = { "Bushido", "Ninjitsu", "Spellweaving", "Disarm", "Enticement", "Chivalry", "Necromancy", "Fishing", "Mysticism","Imbuing"};
         public override Task Load()
         {
             return Task.Run
