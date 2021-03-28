@@ -13,3 +13,5 @@ fixate alcune skill e la visualizzazione.
 Deciso che verrà eliminato il file SkillGrp.MUL, è quindi da correggere la generazione dei gruppi di default 
 da MakeDefault.
 
+29/03
+Corretto fps e inserito il ping.
