@@ -40,16 +40,27 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Managers;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
+        /*
         private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
-
+        */
+        /* UO Mars Debug, Giga487 */
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2})\n";
+        private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
+        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- MousePosAbs: {2}\n";
+        private const string DEBUG_STRING_3 = "- Selected: {0}"; 
+        private const string DEBUG_STRING_PING = "- Ping: {0} ms\n";
+        private const string DEBUG_STRING_PING_SMALL = "\nPing: {0} ms\n";
+        /* */
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
@@ -100,9 +111,11 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
+        private uint _ping;
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
+            _ping = NetClient.Socket.Statistics.Ping;
 
             if (Time.Ticks > _timeToUpdate)
             {
@@ -123,12 +136,15 @@ namespace ClassicUO.Game.UI.Gumps
                         scene.RenderedObjectsCount
                     );
 
-                    _sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
+                    _sb.AppendFormat(DEBUG_STRING_PING, _ping);
+                    //_sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
+                    //_sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
+                    /* giga487 */
                     _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
 
-                    _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
+                    //_sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
 
                     if (CUOEnviroment.Profiler)
                     {
@@ -168,6 +184,8 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
+                    _sb.AppendFormat(DEBUG_STRING_PING_SMALL, NetClient.Socket.Statistics.Ping);  /* giga487 */
+                    
                 }
 
 
