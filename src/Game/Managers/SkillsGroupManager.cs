@@ -304,15 +304,13 @@ namespace ClassicUO.Game.Managers
         {
             Clear();
 
+            MakeDefaultAggressiveSkills();
+            MakeDefaultDefensiveSkills();
+            MakeDefaultWorkerSkills();
+            MakeDefaultUtilitieSkills();
+            /*
             if (!LoadMULFile(UOFileManager.GetUOFilePath("skillgrp.mul")))
             {
-                /*
-                MakeDefaultAggressiveSkills();
-                MakeDefaultDefensiveSkills();
-                MakeDefaultWorkerSkills();
-                MakeDefaultUtilitieSkills();
-                */
-
                 MakeDefaultMiscellaneous();
                 MakeDefaultCombat();
                 MakeDefaultTradeSkills();
@@ -320,9 +318,8 @@ namespace ClassicUO.Game.Managers
                 MakeDefaultWilderness();
                 MakeDefaultThieving();
                 MakeDefaultBard();
-
             }
-
+            */
             foreach (SkillsGroup g in Groups)
             {
                 g.Sort();
@@ -396,17 +393,16 @@ namespace ClassicUO.Game.Managers
             SkillsGroup g = new SkillsGroup();
             g.Name = "Worker";
             g.Add(0);
-            g.Add(35);
+            g.Add(34);
             g.Add(7);
             g.Add(8);
             g.Add(11); //Carpentry
-            g.Add(51); // Harvestring
+            g.Add(52); // Harvestring
             g.Add(43); // Lumberjacking
-            g.Add(29);
-            g.Add(45);
-            g.Add(52);
-            g.Add(34);
-            g.Add(37);
+            g.Add(44);
+            g.Add(51); 
+            g.Add(33);
+            g.Add(36);
 
             Add(g);
         }
@@ -416,16 +412,16 @@ namespace ClassicUO.Game.Managers
             SkillsGroup g = new SkillsGroup();
             g.Name = "Aggressive";
             g.Add(1);
-            g.Add(31);
-            g.Add(51);
-            g.Add(16);
-            g.Add(42);
-            g.Add(19);
-            g.Add(41);
-            g.Add(25);
             g.Add(30);
+            g.Add(50); //bombering
+            g.Add(16);
+            g.Add(41);
+            g.Add(18);
             g.Add(40);
-            g.Add(27);
+            g.Add(24);
+            g.Add(29);
+            g.Add(39);
+            g.Add(26);
 
             Add(g);
         }
@@ -435,19 +431,19 @@ namespace ClassicUO.Game.Managers
             SkillsGroup g = new SkillsGroup();
             g.Name = "Utilities";
             g.Add(2);
-            g.Add(15);
-            g.Add(49);
-            g.Add(23);
-            g.Add(24); //lockpicking
-            g.Add(46); //Med
-            g.Add(29); // Musicianship
-            g.Add(9);
+            g.Add(15); //disco
+            g.Add(48); //focus
             g.Add(22);
-            g.Add(28);
-            g.Add(33);
-            g.Add(56);
-            g.Add(38);
-            g.Add(39);
+            g.Add(23); //lockpicking
+            g.Add(45); //Med
+            g.Add(28); // Musicianship
+            g.Add(9);  //peace
+            g.Add(21); // provo
+            g.Add(27); //snooping
+            g.Add(32);
+            g.Add(49);
+            g.Add(37);
+            g.Add(38); //vet
 
             Add(g);
         }
@@ -456,13 +452,13 @@ namespace ClassicUO.Game.Managers
         {
             SkillsGroup g = new SkillsGroup();
             g.Name = "Defensive";
-            g.Add(14);
+            g.Add(14); //Detect Hidden
+            g.Add(17);
+            g.Add(20);
+            g.Add(5); //Parry
+            g.Add(25);
+            g.Add(46); //Stealth
             g.Add(42);
-            g.Add(21);
-            g.Add(41); //Parry
-            g.Add(51);
-            g.Add(47); //Stealth
-            g.Add(43);
 
             Add(g);
         }
