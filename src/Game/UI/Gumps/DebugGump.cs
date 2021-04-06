@@ -42,6 +42,10 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Managers;
 using ClassicUO.Network;
+using System.Collections.Generic;
+using System.Linq;
+
+
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -69,6 +73,12 @@ namespace ClassicUO.Game.UI.Gumps
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
 
+        static private List<float> alphaPossibleValue = new List<float>() { 0,0.3f, 0.6f, 1.0f }; //{ 0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0, 7f, 0.8f, 0.9f, 1.0f };
+        int size_alphaPossibleValue = alphaPossibleValue.Count;
+        private float alpha = alphaPossibleValue.ElementAt(0);
+
+        private uint _ping;
+
         public DebugGump(int x, int y) : base(0, 0)
         {
             CanMove = true;
@@ -84,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _alphaBlendControl = new AlphaBlendControl(.3f)
+                _alphaBlendControl = new AlphaBlendControl(alpha)
                 {
                     Width = Width, Height = Height
                 }
@@ -110,8 +120,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             return false;
         }
-
-        private uint _ping;
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
@@ -126,6 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (IsMinimized && scene != null)
                 {
+
                     _sb.AppendFormat
                     (
                         DEBUG_STRING_0,
@@ -192,7 +201,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _alphaBlendControl.Width = Width = (int) (size.X + 20);
-                _alphaBlendControl.Height = Height = (int) (size.Y + 20);
+                //_alphaBlendControl.Height = Height = (int) (size.Y + 20);
+                _alphaBlendControl.Height = Height = (int)(size.Y);
 
                 WantUpdateSize = true;
             }
@@ -273,6 +283,38 @@ namespace ClassicUO.Game.UI.Gumps
 
             _last_position.X = ScreenCoordinateX;
             _last_position.Y = ScreenCoordinateY;
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            alpha += 0.1f;
+            base.OnButtonClick(buttonID);
+        }
+
+        /* giga487 */
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            int index = alphaPossibleValue.IndexOf(alpha);
+
+            bool last = index == size_alphaPossibleValue - 1;
+            bool first = index == 0;
+
+            switch (delta)
+            {
+                case MouseEventType.WheelScrollUp:
+                    alpha = last?alphaPossibleValue.ElementAt(index):alphaPossibleValue.ElementAt(index + 1);
+
+                    break;
+
+                case MouseEventType.WheelScrollDown:
+                    alpha = first ?alphaPossibleValue.ElementAt(index):alphaPossibleValue.ElementAt(index - 1);
+
+                    break;
+            }
+
+            _alphaBlendControl.SetAlphaBlendControl(alpha);
+
+
         }
     }
 }

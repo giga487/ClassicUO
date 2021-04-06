@@ -43,6 +43,11 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
         }
 
+        public void SetAlphaBlendControl(float newAlpha = 0.5f)
+        {
+            Alpha = newAlpha;
+        }
+
         public ushort Hue { get; set; }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
