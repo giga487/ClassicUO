@@ -1194,10 +1194,10 @@ namespace ClassicUO.Network
             {
                 return;
             }
+            string parentName = null;
 
             uint serial = p.ReadUInt();
             ushort graphic = p.ReadUShort();
-
 
             if (graphic == 0xFFFF)
             {
@@ -1283,6 +1283,61 @@ namespace ClassicUO.Network
                         }
                     }
                 }
+            }
+            else if (graphic == 60)  /* giga 487 */
+            {
+                uint serialParent = p.ReadUInt();
+                Mobile parent = World.Mobiles.Get(serialParent);
+
+                if(parent != null)
+                {
+                    parentName = parent.Name;
+                }
+
+                Item backpack_player = World.Player.FindItemByLayer(Layer.Backpack);
+                Item item = World.Items.Get(serial);
+                bool backpackMine = backpack_player.Serial == serial;
+
+                if (item != null) 
+                {
+                    ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
+                    bool playsound = false;
+                    int x, y;
+
+                    if (container != null)
+                    {
+                        x = container.ScreenCoordinateX;
+                        y = container.ScreenCoordinateY;
+                        container.Dispose();
+                    }
+                    else
+                    {
+                        ContainerManager.CalculateContainerPosition(serial, graphic);
+                        x = ContainerManager.X;
+                        y = ContainerManager.Y;
+                        playsound = true;
+                    }
+
+                    ushort graphicBackpack = (ushort)(backpackMine? 0x3f:graphic); //Implementazione per ottenere lo zaino diverso.
+
+
+                    UIManager.Add
+                    (
+                        new ContainerGump(item, graphicBackpack, playsound, parentName)
+                        {
+                            X = x,
+                            Y = y,
+                            InvalidateContents = true
+                        }
+                    );
+
+                    UIManager.RemovePosition(serial);
+                }
+                else
+                {
+                    Log.Error("[OpenContainer]: item not found");
+                }
+
             }
             else
             {
@@ -1401,7 +1456,6 @@ namespace ClassicUO.Network
                         y = ContainerManager.Y;
                         playsound = true;
                     }
-
 
                     UIManager.Add
                     (

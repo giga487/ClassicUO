@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
 
-        static private List<float> alphaPossibleValue = new List<float>() { 0,0.3f, 0.6f, 1.0f }; //{ 0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0, 7f, 0.8f, 0.9f, 1.0f };
+        static private List<float> alphaPossibleValue = new List<float>(){ 0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f,0.7f, 0.8f, 0.9f, 1.0f };
         int size_alphaPossibleValue = alphaPossibleValue.Count;
         private float alpha = alphaPossibleValue.ElementAt(0);
 
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnButtonClick(buttonID);
         }
 
-        /* giga487 */
+        /* giga487, vado a variare l'intensità dell'ombra del gump PING/FPS */
         protected override void OnMouseWheel(MouseEventType delta)
         {
             int index = alphaPossibleValue.IndexOf(alpha);

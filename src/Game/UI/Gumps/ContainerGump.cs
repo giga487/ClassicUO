@@ -56,14 +56,17 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly bool _hideIfEmpty;
         private HitBox _hitBox;
         private bool _isMinimized;
-
+        private string name_string;
+        private Item item;
+        private string parentName;
         public ContainerGump() : base(0, 0)
         {
         }
 
-        public ContainerGump(uint serial, ushort gumpid, bool playsound) : base(serial, 0)
+        public ContainerGump(uint serial, ushort gumpid, bool playsound, string parentName = null) : base(serial, 0)
         {
-            Item item = World.Items.Get(serial);
+            item = World.Items.Get(serial);
+            this.parentName = parentName;
 
             if (item == null)
             {
@@ -575,6 +578,29 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
+            /*
+            if(item.Serial == World.Player.FindItemByLayer(Layer.Backpack))
+            {
+                batcher.DrawString
+                (
+                    Fonts.Regular,
+                    parentName,
+                    x + 80, // è centrato, quasi, ma va messo dinamico 
+                    y + 20,
+                    ref HueVector
+                );
+            }
+            */
+
+            batcher.DrawString
+            (
+                Fonts.Regular,
+                parentName,
+                x + 80, // è centrato, quasi, ma va messo dinamico 
+                y + 20,
+                ref HueVector
+            );
+
             if (CUOEnviroment.Debug && !IsMinimized)
             {
                 Rectangle bounds = _data.Bounds;
@@ -595,6 +621,9 @@ namespace ClassicUO.Game.UI.Gumps
                     boundHeight - boundY,
                     ref HueVector
                 );
+
+
+
             }
 
             return true;
