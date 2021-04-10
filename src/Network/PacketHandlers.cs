@@ -1283,59 +1283,10 @@ namespace ClassicUO.Network
                     }
                 }
             }
-            /*
-            else if (graphic == 60)  // giga 487
-            {
-                Item backpack_player = World.Player.FindItemByLayer(Layer.Backpack);
-                Item item = World.Items.Get(serial);
-                bool backpackMine = backpack_player.Serial == serial;
-
-                if (item != null) 
-                {
-                    ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-                    bool playsound = false;
-                    int x, y;
-
-                    if (container != null)
-                    {
-                        x = container.ScreenCoordinateX;
-                        y = container.ScreenCoordinateY;
-                        container.Dispose();
-                    }
-                    else
-                    {
-                        ContainerManager.CalculateContainerPosition(serial, graphic);
-                        x = ContainerManager.X;
-                        y = ContainerManager.Y;
-                        playsound = true;
-                    }
-
-                    ushort graphicBackpack = (ushort)(backpackMine? 0x3f:graphic); //Implementazione per ottenere lo zaino diverso.
-
-
-                    UIManager.Add
-                    (
-                        new ContainerGump(item, graphicBackpack, playsound, parent)
-                        {
-                            X = x,
-                            Y = y,
-                            InvalidateContents = true
-                        }
-                    );
-
-                    UIManager.RemovePosition(serial);
-                }
-                else
-                {
-                    Log.Error("[OpenContainer]: item not found");
-                }
-
-            }
-            */
             else
             {
-                string parentName = "";
-
+                string parentName = "";                  
+                bool checkSnooping = Convert.ToBoolean(p.ReadUShort() == 0x7D?0:1); // ok, se è 0x7d da pacchetto è zero, altrimenti è vero
                 uint serialParent = p.ReadUInt();
                 Mobile parent = World.Mobiles.Get(serialParent);
 
@@ -1457,7 +1408,7 @@ namespace ClassicUO.Network
 
                     UIManager.Add
                     (
-                        new ContainerGump(item, graphic, playsound, parent)
+                        new ContainerGump(item, graphic, playsound, checkSnooping?parent:null)
                         {
                             X = x,
                             Y = y,
@@ -1465,17 +1416,6 @@ namespace ClassicUO.Network
                         }
                     );
 
-                    /*
-                    UIManager.Add
-                    (
-                        new ContainerGump(item, 0x9C5, playsound, parent)
-                        {
-                            X = x,
-                            Y = y,
-                            InvalidateContents = true
-                        }
-                    );
-                    */
                     UIManager.RemovePosition(serial);
                 }
                 else

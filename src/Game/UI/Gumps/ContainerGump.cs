@@ -60,6 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isMinimized;
         private Item item;
         private Mobile _parent;
+        private Label _titleLabel;
         public ContainerGump() : base(0, 0)
         {
         }
@@ -176,8 +177,21 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0));
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
 
-            if(_parent != null) Add(_gumpNomeContainer = new GumpPicContainer(_data.Bounds.X, _data.Bounds.Y-50, ng, 0));
 
+            if (_parent != null)
+            {
+                Add(_gumpNomeContainer = new GumpPicContainer(_data.Bounds.Width/2 - 60 , _data.Bounds.Y - 50, ng, 0));
+
+                string nameBP = _parent.Name + "'s bag";
+                _titleLabel = new Label(nameBP, false, 0x0386, 185)
+                {
+                    X = _gumpNomeContainer.Bounds.X + 10,
+                    Y = _gumpNomeContainer.Bounds.Center.Y - 5
+                };
+
+                Add(_titleLabel);
+
+            }
 
             if (Graphic == 0x0009)
             {
@@ -592,19 +606,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-            string name = "";
-            if(_parent != null)
-            {
-                name = _parent.Name;
-            }
-            batcher.DrawString
-            (
-                Fonts.Regular,
-                name,
-                x + 80, // è centrato, quasi, ma va messo dinamico 
-                y + 20,
-                ref HueVector
-            );
 
             if (CUOEnviroment.Debug && !IsMinimized)
             {

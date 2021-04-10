@@ -412,7 +412,7 @@ namespace ClassicUO.Network
                         {
                             PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
-                            Statistics.TotalPacketsReceived++;
+                             Statistics.TotalPacketsReceived++;
                         }
                     }
 

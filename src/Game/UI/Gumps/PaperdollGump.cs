@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 // QUESTS BUTTON
-                Add
+                Add  //Quest Paperdoll, Giga487
                 (
                     new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
                     {
