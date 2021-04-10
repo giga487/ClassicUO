@@ -50,23 +50,25 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private long _corpseEyeTicks;
         private ContainerData _data;
+        private ContainerData _nameGump;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
-        private GumpPicContainer _gumpPicContainer;
+        private GumpPicContainer _gumpPicContainer; 
+        private GumpPicContainer _gumpNomeContainer;
         private readonly bool _hideIfEmpty;
         private HitBox _hitBox;
         private bool _isMinimized;
-        private string name_string;
         private Item item;
-        private string parentName;
+        private Mobile _parent;
         public ContainerGump() : base(0, 0)
         {
         }
 
-        public ContainerGump(uint serial, ushort gumpid, bool playsound, string parentName = null) : base(serial, 0)
+        public ContainerGump(uint serial, ushort gumpid, bool playsound, Mobile parent = null) : base(serial, 0)
         {
             item = World.Items.Get(serial);
-            this.parentName = parentName;
+ 
+            _parent = parent;
 
             if (item == null)
             {
@@ -74,6 +76,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return;
             }
+
+            ContainerGump nameGump = new ContainerGump();
 
             Graphic = gumpid;
 
@@ -145,6 +149,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return;
             }
+            ushort ng = 0;
+            if (_parent != null) // se non c'è il nome
+            {
+                _nameGump = ContainerManager.Get(0x9C5); //Perfetto 142,21
+                ng = _nameGump.Graphic;
+                _gumpNomeContainer?.Dispose();
+            }
 
             float scale = GetScale();
 
@@ -153,6 +164,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _gumpPicContainer?.Dispose();
+
+
             _hitBox?.Dispose();
 
             _hitBox = new HitBox((int) (_data.MinimizerArea.X * scale), (int) (_data.MinimizerArea.Y * scale), (int) (_data.MinimizerArea.Width * scale), (int) (_data.MinimizerArea.Height * scale));
@@ -163,6 +176,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0));
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
 
+            if(_parent != null) Add(_gumpNomeContainer = new GumpPicContainer(_data.Bounds.X, _data.Bounds.Y-50, ng, 0));
+
+
             if (Graphic == 0x0009)
             {
                 _eyeGumpPic?.Dispose();
@@ -171,7 +187,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);
                 _eyeGumpPic.Height = (int) (_eyeGumpPic.Height * scale);
             }
-
 
             Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
@@ -577,25 +592,15 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-
-            /*
-            if(item.Serial == World.Player.FindItemByLayer(Layer.Backpack))
+            string name = "";
+            if(_parent != null)
             {
-                batcher.DrawString
-                (
-                    Fonts.Regular,
-                    parentName,
-                    x + 80, // è centrato, quasi, ma va messo dinamico 
-                    y + 20,
-                    ref HueVector
-                );
+                name = _parent.Name;
             }
-            */
-
             batcher.DrawString
             (
                 Fonts.Regular,
-                parentName,
+                name,
                 x + 80, // è centrato, quasi, ma va messo dinamico 
                 y + 20,
                 ref HueVector
@@ -612,6 +617,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ResetHueVector();
 
+                /*
                 batcher.DrawRectangle
                 (
                     SolidColorTextureCache.GetTexture(Color.Red),
@@ -621,6 +627,7 @@ namespace ClassicUO.Game.UI.Gumps
                     boundHeight - boundY,
                     ref HueVector
                 );
+                */
 
 
 

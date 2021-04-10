@@ -363,7 +363,7 @@ namespace ClassicUO.Network
             else
             {
                 _packetsTable[0xEE] = -1;
-                _packetsTable[0xEF] = 0x15;
+                _packetsTable[0xEF] = 0x1/5;
                 _packetsTable[0xF1] = -1;
             }
 

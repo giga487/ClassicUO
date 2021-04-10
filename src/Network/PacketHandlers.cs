@@ -1194,7 +1194,6 @@ namespace ClassicUO.Network
             {
                 return;
             }
-            string parentName = null;
 
             uint serial = p.ReadUInt();
             ushort graphic = p.ReadUShort();
@@ -1284,16 +1283,9 @@ namespace ClassicUO.Network
                     }
                 }
             }
-            else if (graphic == 60)  /* giga 487 */
+            /*
+            else if (graphic == 60)  // giga 487
             {
-                uint serialParent = p.ReadUInt();
-                Mobile parent = World.Mobiles.Get(serialParent);
-
-                if(parent != null)
-                {
-                    parentName = parent.Name;
-                }
-
                 Item backpack_player = World.Player.FindItemByLayer(Layer.Backpack);
                 Item item = World.Items.Get(serial);
                 bool backpackMine = backpack_player.Serial == serial;
@@ -1323,7 +1315,7 @@ namespace ClassicUO.Network
 
                     UIManager.Add
                     (
-                        new ContainerGump(item, graphicBackpack, playsound, parentName)
+                        new ContainerGump(item, graphicBackpack, playsound, parent)
                         {
                             X = x,
                             Y = y,
@@ -1339,8 +1331,14 @@ namespace ClassicUO.Network
                 }
 
             }
+            */
             else
             {
+                string parentName = "";
+
+                uint serialParent = p.ReadUInt();
+                Mobile parent = World.Mobiles.Get(serialParent);
+
                 Item item = World.Items.Get(serial);
 
                 if (item != null)
@@ -1459,7 +1457,7 @@ namespace ClassicUO.Network
 
                     UIManager.Add
                     (
-                        new ContainerGump(item, graphic, playsound)
+                        new ContainerGump(item, graphic, playsound, parent)
                         {
                             X = x,
                             Y = y,
@@ -1467,6 +1465,17 @@ namespace ClassicUO.Network
                         }
                     );
 
+                    /*
+                    UIManager.Add
+                    (
+                        new ContainerGump(item, 0x9C5, playsound, parent)
+                        {
+                            X = x,
+                            Y = y,
+                            InvalidateContents = true
+                        }
+                    );
+                    */
                     UIManager.RemovePosition(serial);
                 }
                 else
