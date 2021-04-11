@@ -37,28 +37,19 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Resources;
-using System.Linq;
 
 namespace ClassicUO.Game.Managers
 {
     internal class PartyManager
     {
         private const int PARTY_SIZE = 10;
+
         public uint Leader { get; set; }
         public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
         public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
 
-        uint actualIndex = 0;
-        public void AddMember(string name, uint serial)
-        {
-            if(!Contains(serial) && actualIndex < 10)
-            {
-                Members[actualIndex] = new PartyMember(serial, name);
-                actualIndex++;
-            }
-        }
 
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
@@ -189,8 +180,7 @@ namespace ClassicUO.Game.Managers
                 case 3:
                 case 4: /* questo è il messaggio di chat */
                     uint ser = p.ReadUInt();
-                    byte[] buff = p.Buffer;
-                    string text_mex = p.ReadUnicode();  /* è il messaggio, non il nome. */
+                    string name = p.ReadUnicode();
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
@@ -199,7 +189,7 @@ namespace ClassicUO.Game.Managers
                             MessageManager.HandleMessage
                             (
                                 null,
-                                text_mex,
+                                name,
                                 Members[i].Name,
                                 ProfileManager.CurrentProfile.PartyMessageHue,
                                 MessageType.Party,
@@ -240,23 +230,6 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        char[] charNonVedere = {'\0'};
-        public string GetName(uint serial)
-        {
-            if(Contains(serial))
-            {
-                foreach (var e in World.Party.Members)
-                {
-                    if (e.Serial == serial)
-                    {
-                        return e.Name.Replace("\0", string.Empty); /* questo perchè la stringa termina con Null, l'ho eliminato */
-                    }
-                }
-            }
-
-            return ""; /* giga487, vuol dire che l'elemento che esiste, non esiste */
-        }
-
         public void Clear()
         {
             Leader = 0;
@@ -279,13 +252,6 @@ namespace ClassicUO.Game.Managers
             _name = Name;
         }
 
-        public PartyMember(uint serial, string name)
-        {
-            Serial = serial;
-            _name = name;
-        }
-
-        /* questa funzione restituisce i nomi mobiles */
         public string Name
         {
             get

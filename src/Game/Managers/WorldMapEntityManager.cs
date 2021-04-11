@@ -36,14 +36,11 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Game.UoMars;
-
 
 namespace ClassicUO.Game.Managers
 {
-    
     internal class WMapEntity
-    {   
+    {
         public WMapEntity(uint serial)
         {
             Serial = serial;
@@ -153,7 +150,6 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-
             if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
@@ -256,6 +252,7 @@ namespace ClassicUO.Game.Managers
                             if (mob == null || mob.Distance > World.ClientViewRange)
                             {
                                 NetClient.Socket.Send(new PQueryPartyPosition());
+
                                 break;
                             }
                         }
