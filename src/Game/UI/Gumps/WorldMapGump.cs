@@ -109,6 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+
             X = _last_position.X;
             Y = _last_position.Y;
 
@@ -137,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ShowBorder = !_isTopMost;
 
-                LayerOrder = _isTopMost ? UILayer.Over : UILayer.Default;
+                LayerOrder = _isTopMost ? UILayer.Over : UILayer.Under;
             }
         }
 
@@ -1552,6 +1553,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_showMarkers && _mapMarkersLoaded)
             {
+                WMapMarker lastMarker = null;
+
                 foreach (WMapMarkerFile file in _markerFiles)
                 {
                     if (file.Hidden)
@@ -1561,7 +1564,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (WMapMarker marker in file.Markers)
                     {
-                        DrawMarker
+                        if (DrawMarker
                         (
                             batcher,
                             marker,
@@ -1570,8 +1573,16 @@ namespace ClassicUO.Game.UI.Gumps
                             halfWidth,
                             halfHeight,
                             Zoom
-                        );
+                        ))
+                        {
+                            lastMarker = marker;
+                        }
                     }
+                }
+
+                if (lastMarker != null)
+                {
+                    DrawMarkerString(batcher, lastMarker, gX, gY, halfWidth, halfHeight);
                 }
             }
 
@@ -1962,7 +1973,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void DrawMarker
+        private bool DrawMarker
         (
             UltimaBatcher2D batcher,
             WMapMarker marker,
@@ -1975,12 +1986,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (marker.MapId != World.MapIndex)
             {
-                return;
+                return false;
             }
 
             if (_zoomIndex < marker.ZoomIndex && marker.Color == Color.Transparent)
             {
-                return;
+                return false;
             }
 
             ResetHueVector();
@@ -2005,10 +2016,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (rotX < x || rotX > x + Width - 8 - DOT_SIZE || rotY < y || rotY > y + Height - 8 - DOT_SIZE)
             {
-                return;
+                return false;
             }
 
             bool showMarkerName = _showMarkerNames && !string.IsNullOrEmpty(marker.Name) && _zoomIndex > 5;
+            bool drawSingleName = false;
 
             if (_zoomIndex < marker.ZoomIndex || !_showMarkerIcons || marker.MarkerIcon == null)
             {
@@ -2022,72 +2034,118 @@ namespace ClassicUO.Game.UI.Gumps
                     ref HueVector
                 );
 
-                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF && Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
+                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF &&
+                    Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
                 {
-                    showMarkerName = true;
+                    drawSingleName = true;
                 }
             }
             else
             {
                 batcher.Draw2D(marker.MarkerIcon, rotX - (marker.MarkerIcon.Width >> 1), rotY - (marker.MarkerIcon.Height >> 1), ref HueVector);
-
+               
                 if (!showMarkerName)
                 {
-                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) && Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) && Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) && Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
+                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) &&
+                        Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) &&
+                        Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) &&
+                        Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
                     {
-                        showMarkerName = true;
+                        drawSingleName = true;
                     }
                 }
             }
 
             if (showMarkerName)
             {
-                Vector2 size = _markerFont.MeasureString(marker.Name);
+                DrawMarkerString(batcher, marker, x, y, width, height);
 
-                if (rotX + size.X / 2 > x + Width - 8)
-                {
-                    rotX = x + Width - 8 - (int) (size.X / 2);
-                }
-                else if (rotX - size.X / 2 < x)
-                {
-                    rotX = x + (int) (size.X / 2);
-                }
-
-                if (rotY + size.Y > y + Height)
-                {
-                    rotY = y + Height - (int) size.Y;
-                }
-                else if (rotY - size.Y < y)
-                {
-                    rotY = y + (int) size.Y;
-                }
-
-                int xx = (int) (rotX - size.X / 2);
-                int yy = (int) (rotY - size.Y - 5);
-
-                HueVector.X = 0;
-                HueVector.Y = 1;
-
-                batcher.DrawString
-                (
-                    _markerFont,
-                    marker.Name,
-                    xx + 1,
-                    yy + 1,
-                    ref HueVector
-                );
-
-                ResetHueVector();
-
-                batcher.DrawString
-                (
-                    _markerFont,
-                    marker.Name,
-                    xx,
-                    yy,
-                    ref HueVector
-                );
+                drawSingleName = false;
             }
+
+            return drawSingleName;
+        }
+
+        private void DrawMarkerString(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height)
+        {
+            int sx = marker.X - _center.X;
+            int sy = marker.Y - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint
+            (
+                sx,
+                sy,
+                Zoom,
+                1,
+                _flipMap ? 45f : 0f
+            );
+
+            rotX += x + width;
+            rotY += y + height;
+
+            Vector2 size = _markerFont.MeasureString(marker.Name);
+
+            if (rotX + size.X / 2 > x + Width - 8)
+            {
+                rotX = x + Width - 8 - (int)(size.X / 2);
+            }
+            else if (rotX - size.X / 2 < x)
+            {
+                rotX = x + (int)(size.X / 2);
+            }
+
+            if (rotY + size.Y > y + Height)
+            {
+                rotY = y + Height - (int)size.Y;
+            }
+            else if (rotY - size.Y < y)
+            {
+                rotY = y + (int)size.Y;
+            }
+
+            int xx = (int)(rotX - size.X / 2);
+            int yy = (int)(rotY - size.Y - 5);
+
+            ResetHueVector();
+
+            HueVector.X = 0;
+            HueVector.Y = 1;
+            HueVector.Z = 0.5f;
+
+            batcher.Draw2D
+            (
+                SolidColorTextureCache.GetTexture(Color.Black),
+                xx - 2,
+                yy - 2,
+                size.X + 4,
+                size.Y + 4,
+                ref HueVector
+            );
+
+            ResetHueVector();
+
+            HueVector.X = 0;
+            HueVector.Y = 1;
+
+            batcher.DrawString
+            (
+                _markerFont,
+                marker.Name,
+                xx + 1,
+                yy + 1,
+                ref HueVector
+            );
+
+            ResetHueVector();
+
+            batcher.DrawString
+            (
+                _markerFont,
+                marker.Name,
+                xx,
+                yy,
+                ref HueVector
+            );
         }
 
 
@@ -2104,10 +2162,10 @@ namespace ClassicUO.Game.UI.Gumps
             float zoom
         )
         {
-            ResetHueVector();
-
             int sx = multiX - _center.X;
             int sy = multiY - _center.Y;
+            int sW = Math.Abs(house.Bounds.Width - house.Bounds.X);
+            int sH = Math.Abs(house.Bounds.Height - house.Bounds.Y);
 
             (int rotX, int rotY) = RotatePoint
             (
@@ -2118,6 +2176,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _flipMap ? 45f : 0f
             );
 
+          
             rotX += x + width;
             rotY += y + height;
 
@@ -2129,39 +2188,24 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            ResetHueVector();
+
+            Texture2D texture = SolidColorTextureCache.GetTexture(Color.DarkGray);
+
             batcher.Draw2D
             (
-                SolidColorTextureCache.GetTexture(Color.Aquamarine),
-                rotX - DOT_SIZE_HALF,
-                rotY - DOT_SIZE_HALF,
-                DOT_SIZE,
-                DOT_SIZE,
-                ref HueVector
+                texture,
+                rotX - sW / 2f * zoom,
+                rotY - sH / 2f * zoom,
+                sW * zoom,
+                sH * zoom,
+                0,
+                0,
+                sW,
+                sH,
+                ref HueVector,
+                _flipMap ? 45f : 0f
             );
-
-
-            /*ResetHueVector();
-
-            foreach (Multi component in house.Components)
-            {
-                sx = component.X - _center.X;
-                sy = component.Y - _center.Y;
-
-                (rotX, rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
-
-                rotX += x + width;
-                rotY += y + height;
-
-                batcher.Draw2D
-                (
-                    SolidColorTextureCache.GetTexture(Color.Aquamarine),
-                    rotX - DOT_SIZE_HALF,
-                    rotY - DOT_SIZE_HALF, 
-                    WWW,
-                    HHH, 
-                    ref HueVector
-                );
-            }*/
         }
 
 
