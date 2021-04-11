@@ -5446,7 +5446,8 @@ namespace ClassicUO.Network
                             string name = p.ReadUnicode();
                             /* giga487, inserisce qui l'insieme degli elementi */
 
-                            int hits = type == 1 ? 0 : p.ReadByte();
+                            //int hits = type == 1 ? 0 : p.ReadByte();
+                            int hits = p.ReadByte();
 
                             World.WMapManager.AddOrUpdate
                             (
