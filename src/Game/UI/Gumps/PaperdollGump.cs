@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
                 // LOG OUT BUTTON
                 Add
                 (
-                    new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                    new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db) //tasto da normal, tasto premuto,tasto over
                     {
                         X = 185,
                         Y = 44 + 27 * 2,
@@ -187,7 +187,8 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 // QUESTS BUTTON
-                Add  //Quest Paperdoll, Giga487
+
+                Add  
                 (
                     new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
                     {
@@ -196,6 +197,8 @@ namespace ClassicUO.Game.UI.Gumps
                         ButtonAction = ButtonAction.Activate
                     }
                 );
+ 
+                Add( new Label("PARTY", false, 0x0555, 185, align : TEXT_ALIGN_TYPE.TS_LEFT){X = 185 + 10, Y = 5 + 44 + 27 * 3} );
 
                 // SKILLS BUTTON
                 Add
@@ -238,7 +241,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
-
+                //Giga487, modifiche per eliminare i manifest nel paperdoll
+                /* 
                 if (World.ClientFeatures.PaperdollBooks)
                 {
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
@@ -259,7 +263,9 @@ namespace ClassicUO.Game.UI.Gumps
                         profileX += SCROLLS_STEP;
                     }
                 }
+                */
 
+                /*
                 Add(_profilePic = new GumpPic(profileX, 196, 0x07D2, 0));
                 _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
 
@@ -268,11 +274,11 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
 
-
                 _hitBox = new HitBox(228, 260, 16, 16);
                 _hitBox.MouseUp += _hitBox_MouseUp;
 
                 Add(_hitBox);
+                */
             }
             else
             {
@@ -447,6 +453,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
+
+        /* Giga487 */
+
+
 
         public override void Update(double totalTime, double frameTime)
         {
@@ -677,7 +687,21 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Quests:
-                    GameActions.RequestQuestMenu();
+                    //GameActions.RequestQuestMenu();
+                    PartyGump party = UIManager.GetGump<PartyGump>();
+
+                    if (party == null)
+                    {
+                        int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
+                        int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
+                        UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
+                    }
+                    else
+                    {
+                        party.BringOnTop();
+                    }
+
+
 
                     break;
 

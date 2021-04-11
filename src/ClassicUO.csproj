@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
-    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
+    <ApplicationIcon></ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
