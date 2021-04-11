@@ -124,19 +124,10 @@ namespace ClassicUO.Game.Managers
 
                     bool remove_all = !add && to_remove == World.Player;
                     int done = 0;
-                    string[] name = new string[count];
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        name[i] = p.ReadUnicode();
-                    }
-
 
                     for (int i = 0; i < count; i++)
                     {
                         uint serial = p.ReadUInt();
-
-
                         bool remove = !add && serial == to_remove;
 
                         if (remove && serial == to_remove && i == 0)
@@ -148,16 +139,7 @@ namespace ClassicUO.Game.Managers
                         {
                             if (!Contains(serial))
                             {
-                                /* qui viene generato l'elemento del party iniziale
-                                 * inizializzato dal party member tramite seriale
-                                 * quindi chi assegna il nome? il costruttore di PartyMember,
-                                 * il byte che viene letto è il [4] che è il subcommands di
-                                 * http://docs.polserver.com/packets/index.php?Packet=0xBF&Sort=1
-                                 * e quindi, il [5] è 1 perchè siamo in add member.
-                                 * 4 byte per il seriale, 7 8 9 10. Non viene passato il nome */
-
-                                Members[i] = new PartyMember(serial, name[i]); /* giga487 */
-                                //Members[i] = new PartyMember(serial);
+                                Members[i] = new PartyMember(serial);
                             }
 
                             done++;

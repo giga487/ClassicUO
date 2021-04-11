@@ -164,8 +164,6 @@ namespace ClassicUO.Game.Managers
                     Name = name
                 };
 
-                //entity.Name = World.Party.GetName(serial);
-
                 Entities[serial] = entity;
             }
             else
@@ -176,35 +174,12 @@ namespace ClassicUO.Game.Managers
                 entity.Map = map;
                 entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
-                entity.Name = name;
-                /*
+
                 if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
                 {
                     entity.Name = name;
                 }
-                */
-
             }
-
-            if(entity.IsGuild)
-            {
-                World.Guild.AddMember(name, serial);
-                entity.Name = World.Guild.GetName(serial);
-            }
-            else 
-            {
-                World.Party.AddMember(name, serial);
-                entity.Name = World.Party.GetName(serial);
-            }
-            //World.Party.AddMember(name, serial);
-
-            /*
-            bool inParty = World.Party.Contains(serial);
-            bool inGuild = World.Guild.Contains(serial);
-
-            entity.Name = inGuild ? World.Guild.GetName(serial) : World.Party.GetName(serial);
-            */
-            //entity.Name = World.Guild.GetName(serial);
         }
 
         public void Remove(uint serial)

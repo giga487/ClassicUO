@@ -5444,7 +5444,7 @@ namespace ClassicUO.Network
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
 
-                            string name = p.ReadUnicode();
+                            //string name = p.ReadUnicode();
                             /* giga487, inserisce qui l'insieme degli elementi */
 
                             int hits = type == 1 ? 0 : p.ReadByte();
@@ -5457,7 +5457,7 @@ namespace ClassicUO.Network
                                 hits,
                                 map,
                                 type == 0x02,
-                                name,
+                                null,
                                 true
                             ); ;
 
