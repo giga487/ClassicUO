@@ -106,8 +106,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             int yPtr = 48;
 
-            PartyManager mem = World.Party;
-
             for (int i = 0; i < 10; i++)
             {
                 Add

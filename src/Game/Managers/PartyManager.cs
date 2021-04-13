@@ -37,6 +37,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using System.Linq;
 
 namespace ClassicUO.Game.Managers
 {
@@ -48,9 +49,58 @@ namespace ClassicUO.Game.Managers
         public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
-        public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
+
+        public int getSelfIndex()
+        {
+            return Array.FindIndex(Members, s => s != null && s.Serial == World.Player.Serial);
+        }
+
+        public int firstFreeIndex()
+        {
+           return Array.FindIndex(Members, s => s == null);           
+        }
+        public PartyMember[] Members { get; set;} = new PartyMember[PARTY_SIZE];
+
+        public bool ResetArrayWithouthSelf()
+        {
+
+            for (int i = 0; i < PARTY_SIZE; i++)
+            {
+                if((Members[i] == null) || i == getSelfIndex()) continue;
 
 
+                Members[i] = null;
+            }
+
+            return true;
+
+        }
+
+        public bool InsertPartyElement(uint serial, string name) //inserisce l'elemento del party libero
+        {
+            if(!World.Party.Contains(serial))
+            {
+                int firstIndexToFill = firstFreeIndex();
+
+                if (firstIndexToFill > -1)
+                {
+                    Members[firstIndexToFill] = new PartyMember(serial, name);
+                }
+            }
+
+
+            /*
+            for (int i = 0; i < PARTY_SIZE; i++)
+            {
+                if(i == getSelfIndex() || Members[i] != null) continue;
+
+                Members[i] = new PartyMember(serial, name);
+                return true;
+            }
+            */
+
+            return true;
+        }
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
 
@@ -252,6 +302,13 @@ namespace ClassicUO.Game.Managers
             _name = Name;
         }
 
+        public PartyMember(uint serial, string PartyMemberName)
+        {
+            Serial = serial;
+            _name = PartyMemberName;
+        }
+
+
         public string Name
         {
             get
@@ -284,4 +341,6 @@ namespace ClassicUO.Game.Managers
 
         public uint Serial;
     }
+
+
 }

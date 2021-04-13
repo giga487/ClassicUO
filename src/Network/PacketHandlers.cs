@@ -5435,6 +5435,9 @@ namespace ClassicUO.Network
                     bool locations = type == 0x01 || p.ReadBool();
 
                     uint serial;
+                    int i = 0;
+
+                    World.Party.ResetArrayWithouthSelf(); //Giga487, annulla gli elementi
 
                     while ((serial = p.ReadUInt()) != 0)
                     {
@@ -5444,10 +5447,16 @@ namespace ClassicUO.Network
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
                             string name = p.ReadUnicode();
+
                             /* giga487, inserisce qui l'insieme degli elementi */
 
                             //int hits = type == 1 ? 0 : p.ReadByte();
                             int hits = p.ReadByte();
+
+                            if(type == 0x01 )
+                            {
+                                World.Party.InsertPartyElement(serial, name);
+                            }
 
                             World.WMapManager.AddOrUpdate
                             (
