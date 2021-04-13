@@ -49,6 +49,11 @@ namespace ClassicUO.Game.Managers
         public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
+        public int getIndex(uint serial)
+        {
+            return Array.FindIndex(Members, s => s != null && s.Serial == serial);
+        }
+
 
         public int getSelfIndex()
         {
@@ -68,7 +73,6 @@ namespace ClassicUO.Game.Managers
             {
                 if((Members[i] == null) || i == getSelfIndex()) continue;
 
-
                 Members[i] = null;
             }
 
@@ -77,27 +81,21 @@ namespace ClassicUO.Game.Managers
         }
 
         public bool InsertPartyElement(uint serial, string name) //inserisce l'elemento del party libero
-        {
-            if(!World.Party.Contains(serial))
+        {           
+
+            if(World.Party.Contains(serial) && Members[getIndex(serial)].Name == "")
+            {
+                Members[getIndex(serial)] = new PartyMember(serial, name);
+            }
+            else if(!World.Party.Contains(serial))
             {
                 int firstIndexToFill = firstFreeIndex();
 
-                if (firstIndexToFill > -1)
+                if(firstIndexToFill > -1)
                 {
                     Members[firstIndexToFill] = new PartyMember(serial, name);
                 }
             }
-
-
-            /*
-            for (int i = 0; i < PARTY_SIZE; i++)
-            {
-                if(i == getSelfIndex() || Members[i] != null) continue;
-
-                Members[i] = new PartyMember(serial, name);
-                return true;
-            }
-            */
 
             return true;
         }
