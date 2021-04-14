@@ -99,6 +99,7 @@ namespace ClassicUO.Game.Managers
 
             return true;
         }
+
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
 
