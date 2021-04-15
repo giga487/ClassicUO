@@ -15,3 +15,7 @@ da MakeDefault.
 
 29/03
 Corretto fps e inserito il ping.
+
+15/04
+Modifica alla World Map che ora fornisce nome, posizione e vita dei membri del party.
+Sto lavorando sul party e sulla correzione dei bachi del software.

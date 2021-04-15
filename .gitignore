@@ -268,3 +268,6 @@ __pycache__/
 
 /Fiddler
 *.bak
+
+/src
+/*.csproj

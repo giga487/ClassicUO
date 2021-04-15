@@ -135,9 +135,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string name = ""; /* questo è un parametro di default, in pratica */
 
-                /* Giga487 */
-                var e = World.Party.Members[i];
-
                 if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
                 {
                     name = World.Party.Members[i].Name;

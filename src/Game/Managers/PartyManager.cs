@@ -106,19 +106,41 @@ namespace ClassicUO.Game.Managers
         public void ParsePacket(ref PacketBufferReader p)
         {
             byte code = p.ReadByte();
-
+            bool partyGiga487 = true;
             bool add = false;
-
+            byte count = 0;
             switch (code)
             {
                 case 1:
                     add = true;
-                    goto case 2;
+
+                    if (!partyGiga487)
+                        goto case 2; //giga487, trovo molto confuso questa parte di codice, la riscrivo.
+                    else
+                    {
+                        count = p.ReadByte();
+
+                        if (count <= 1)
+                        {
+
+                        }
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            uint serial = p.ReadUInt();
+                            Members[i] = new PartyMember(serial);
+                        }
+
+                    }
+
+
+
+                    break;
 
                 case 2:
-                    byte count = p.ReadByte();
+                    count = p.ReadByte();
 
-                    if (count <= 1)
+                    if (count <= 1) //se ho 2 elementi e ne rimuovo uno
                     {
                         Leader = 0;
                         Inviter = 0;
