@@ -246,7 +246,7 @@ namespace ClassicUO.Game.Managers
 
 
                     UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
-
+                    NetClient.Socket.Send(new PQueryPartyPosition());
                     break;
 
                 case 3:
