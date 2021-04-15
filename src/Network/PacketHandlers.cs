@@ -5435,9 +5435,8 @@ namespace ClassicUO.Network
                     bool locations = type == 0x01 || p.ReadBool();
 
                     uint serial;
-                    int i = 0;
 
-                    World.Party.ResetArrayWithouthSelf(); //Giga487, annulla gli elementi
+                    //World.Party.ResetArrayWithouthSelf(); //Giga487, annulla gli elementi
 
                     while ((serial = p.ReadUInt()) != 0)
                     {
@@ -5448,7 +5447,7 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             string name = p.ReadUnicode();
 
-                            /* giga487, inserisce qui l'insieme degli elementi */
+                            // giga487, inserisce qui l'insieme degli elementi
 
                             //int hits = type == 1 ? 0 : p.ReadByte();
                             int hits = p.ReadByte();
@@ -5456,6 +5455,7 @@ namespace ClassicUO.Network
                             if(type == 0x01 )
                             {
                                 World.Party.InsertPartyElement(serial, name);
+                                //Members[i] = new PartyMember(serial);
                             }
 
                             World.WMapManager.AddOrUpdate
@@ -5470,12 +5470,27 @@ namespace ClassicUO.Network
                                 true
                             ); ;
 
+                            /*
+                            World.WMapManager.AddOrUpdate
+                            (
+                                serial,
+                                x,
+                                y,
+                                hits,
+                                map,
+                                type == 0x02,
+                                null,
+                                true
+                            );
+                            */
+
                         }
                     }
 
                     World.WMapManager.RemoveUnupdatedWEntity();
 
                     break;
+
 
                 case 0x03: // runebook contents
                     break;

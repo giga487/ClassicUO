@@ -83,11 +83,11 @@ namespace ClassicUO.Game.Managers
         public bool InsertPartyElement(uint serial, string name) //inserisce l'elemento del party libero
         {           
 
-            if(World.Party.Contains(serial) && Members[getIndex(serial)].Name == "")
+            if(World.Party.Contains(serial) && Members[getIndex(serial)].Name == null)
             {
                 Members[getIndex(serial)] = new PartyMember(serial, name);
             }
-            else if(!World.Party.Contains(serial))
+            if(!Contains(serial))
             {
                 int firstIndexToFill = firstFreeIndex();
 
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Managers
         public void ParsePacket(ref PacketBufferReader p)
         {
             byte code = p.ReadByte();
-            bool partyGiga487 = true;
+            bool partyGiga487 = false;
             bool add = false;
             byte count = 0;
             switch (code)
@@ -128,6 +128,7 @@ namespace ClassicUO.Game.Managers
                         for (int i = 0; i < count; i++)
                         {
                             uint serial = p.ReadUInt();
+                            //InsertPartyElement(serial, wme.Name); //inserisce l'elemento del party libero
                             Members[i] = new PartyMember(serial);
                         }
 
