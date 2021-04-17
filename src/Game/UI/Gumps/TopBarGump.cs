@@ -44,16 +44,24 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using ClassicUO.Mars.EnhancedM;
+
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class TopBarGump : Gump
     {
+        EnhancedMapOpen exeEnhancedMap;
+        private bool mapInstalled = false;
         private TopBarGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+            exeEnhancedMap = new EnhancedMapOpen();
+
+            if (exeEnhancedMap.isMapInstalled)
+                mapInstalled = true;
 
             // little
             Add
@@ -104,13 +112,14 @@ namespace ClassicUO.Game.UI.Gumps
                 new [] {1, (int) Buttons.VendorSearch },
                 new [] {0, (int) Buttons.UOMarsBible },
                 new [] {0, (int) Buttons.UOMarsForum },
-                new [] {0, (int) Buttons.Debug }
+                new [] {0, (int) Buttons.Debug },
+                new [] {0, (int) Buttons.EnhancedMap }
                 //new [] {1, (int) Buttons.GlobalChat },
             };
 
             string[] texts =
             {
-                ResGumps.WorldMap, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, "Vendor Search", "UO Bible", "Forum", "FPS"
+                ResGumps.WorldMap, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, "Vendor Search", "UO Bible", "Forum", "FPS","EnhancedMap"
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
@@ -139,6 +148,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < texts.Length; i++)
             {
+                if (mapInstalled == false && (texts[i] == "EnhancedMap"))
+                    continue;
+
+
                 if (!hasUOStore && i >= (int) Buttons.UOStore)
                 {
                     break;
@@ -327,9 +340,15 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.UOMarsBible:
                     System.Diagnostics.Process.Start("https://uomars.it/bible");
                     break;
+
                 case Buttons.UOMarsForum:
                     System.Diagnostics.Process.Start("https://forum.uomars.it");
                     break;
+
+                case Buttons.EnhancedMap:
+                    exeEnhancedMap.getStatus();
+                    break;
+
             }
         }
 
@@ -344,6 +363,7 @@ namespace ClassicUO.Game.UI.Gumps
             WorldMap,
             Info,
             Debug,
+            EnhancedMap,
             NetStats,
             GlobalChat,
             VendorSearch,

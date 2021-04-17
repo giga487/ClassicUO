@@ -150,10 +150,5 @@
 
   </Target>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(TargetPath) &quot;D:\Git\ClassicUO\exe&quot;" />
-  </Target>
-
-
 </Project>
 
