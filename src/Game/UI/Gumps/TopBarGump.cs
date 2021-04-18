@@ -53,6 +53,13 @@ namespace ClassicUO.Game.UI.Gumps
     {
         EnhancedMapOpen exeEnhancedMap;
         private bool mapInstalled = false;
+
+        enum labelBig
+        {
+            small = 0,
+            big = 1
+        }
+
         private TopBarGump() : base(0, 0)
         {
             CanMove = true;
@@ -103,17 +110,17 @@ namespace ClassicUO.Game.UI.Gumps
             /* Giga487 */
             int[][] textTable =
             {
-                new [] {1, (int) Buttons.WorldMap },
-                new [] {1, (int) Buttons.Paperdoll },
-                new [] {1, (int) Buttons.Inventory },
-                new [] {1, (int) Buttons.Journal },
-                new [] {0, (int) Buttons.Chat },
+                new [] {(int)labelBig.big, (int) Buttons.WorldMap },
+                new [] {(int)labelBig.big, (int) Buttons.Paperdoll },
+                new [] {(int)labelBig.big, (int) Buttons.Inventory },
+                new [] {(int)labelBig.big, (int) Buttons.Journal },
+                new [] {(int)labelBig.small, (int) Buttons.Chat },
                 //new [] {0, (int) Buttons.Help },
-                new [] {1, (int) Buttons.VendorSearch },
-                new [] {0, (int) Buttons.UOMarsBible },
-                new [] {0, (int) Buttons.UOMarsForum },
-                new [] {0, (int) Buttons.Debug },
-                new [] {0, (int) Buttons.EnhancedMap }
+                new [] {(int)labelBig.big, (int) Buttons.VendorSearch },
+                new [] {(int)labelBig.small, (int) Buttons.UOMarsBible },
+                new [] {(int)labelBig.small, (int) Buttons.UOMarsForum },
+                new [] {(int)labelBig.small, (int) Buttons.Debug },
+                new [] {(int)labelBig.big, (int) Buttons.EnhancedMap } //1 vuol dire che il tasto è grande, imbarazzo
                 //new [] {1, (int) Buttons.GlobalChat },
             };
 
@@ -160,10 +167,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (mapInstalled == false && (texts[i] == "EnhancedMap"))
                     continue;
-                else if (mapInstalled == true && (texts[i] == "EnhancedMap"))
-                    graphic = 0x098D; //tasto grosso
-
-
 
                 Add
                 (
