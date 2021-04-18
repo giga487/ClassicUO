@@ -1302,7 +1302,17 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("Experimental", resourceCulture);
             }
         }
-        
+
+        //Impostazioni lato client di enhanced Map
+        public static string EnhancedMap
+        {
+            get
+            {
+                return "Enhanced Map";
+                //return ResourceManager.GetString("EnhancedMap", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Eyedropper Tool.
         /// </summary>

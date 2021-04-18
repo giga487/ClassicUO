@@ -130,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 background = new ResizePic(0x13BE)
                 {
-                    Height = 27
+                    Height = 27,
                 },
                 1
             );
@@ -148,8 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < texts.Length; i++)
             {
-                if (mapInstalled == false && (texts[i] == "EnhancedMap"))
-                    continue;
+
 
 
                 if (!hasUOStore && i >= (int) Buttons.UOStore)
@@ -158,6 +157,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 ushort graphic = (ushort) (textTable[i][0] != 0 ? 0x098D : 0x098B);
+
+                if (mapInstalled == false && (texts[i] == "EnhancedMap"))
+                    continue;
+                else if (mapInstalled == true && (texts[i] == "EnhancedMap"))
+                    graphic = 0x098D; //tasto grosso
+
+
 
                 Add
                 (
@@ -346,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.EnhancedMap:
-                    exeEnhancedMap.getStatus();
+                    exeEnhancedMap.setStatus();
                     break;
 
             }
