@@ -4638,7 +4638,7 @@ namespace ClassicUO.Network
                         case 0x00:  // Play custom sound
 
                             string soundPath = p.ReadASCII();
-                            UoMarsHandler.PlaySound(soundPath);
+                            UOMarsPacketHandler.PlaySound(soundPath);
                             //test
                             break;
                     }
