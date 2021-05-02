@@ -4638,46 +4638,7 @@ namespace ClassicUO.Network
                         case 0x00:  // Play custom sound
 
                             string soundPath = p.ReadASCII();
-                            
-                            Profile currentProfile = ProfileManager.CurrentProfile;
-                            if(currentProfile == null)
-                            {
-                                return;
-                            }
-                            
-                            float volume = currentProfile.SoundVolume / Constants.SOUND_DELTA;
-
-                            if (Client.Game.IsActive)
-                            {
-                                if (!currentProfile.ReproduceSoundsInBackground)
-                                {
-                                    volume = currentProfile.SoundVolume / Constants.SOUND_DELTA;
-                                }
-                            }
-                            else if (!currentProfile.ReproduceSoundsInBackground)
-                            {
-                                volume = 0;
-                            }
-
-                            if (volume < -1 || volume > 1f)
-                            {
-                                return;
-                            }
-                            
-                            if (!currentProfile.EnableSound || !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
-                            {
-                                volume = 0;
-                            }
-                            
-                            try
-                            {
-                                // full path will be: \UoMarsClient/Music/Digital/UoMars/file.mp3
-                                UOMusic music = new UOMusic(0, "UoMars/" + soundPath, false);
-                                music.Play(volume);
-                            }
-                            catch (Exception e)
-                            {}
-                            
+                            UoMarsHandler.PlaySound(soundPath);
                             
                             break;
                     }
