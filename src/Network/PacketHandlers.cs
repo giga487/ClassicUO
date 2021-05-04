@@ -56,6 +56,8 @@ using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.UoMars;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
 
 namespace ClassicUO.Network
@@ -6789,6 +6791,21 @@ namespace ClassicUO.Network
                 else if (string.Equals(entry, "mastergump", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
+                }
+                else if (string.Equals(entry, "uomarspiccontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    int uoMarsPicControlX = Convert.ToInt32(gparams[1]);
+                    int uoMarsPicControlY = Convert.ToInt32(gparams[2]);
+                    string uoMarsPicControlFilename = gparams[3];
+                    
+                    string uoMarsPicControlPath = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{uoMarsPicControlFilename}.txt");
+                    string uoMarsPicControlBase64 = System.IO.File.ReadAllText(uoMarsPicControlPath);
+                    var uoMarsPicControlBytes = Convert.FromBase64String(uoMarsPicControlBase64);
+            
+                    Stream uoMarsPicControlStream = new MemoryStream(uoMarsPicControlBytes);
+                    Texture2D uoMarsPicControlTexture = Texture2D.FromStream(Client.Game.GraphicsDevice, uoMarsPicControlStream);
+                    UoMarsPicControl uoMarsPicControlHanlder = new UoMarsPicControl(uoMarsPicControlX, uoMarsPicControlY, uoMarsPicControlTexture);
+                    gump.Add(uoMarsPicControlHanlder);
                 }
                 else
                 {
