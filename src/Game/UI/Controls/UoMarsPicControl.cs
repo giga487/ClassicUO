@@ -22,14 +22,19 @@ namespace ClassicUO.Game.UI.Controls
             // inputs[1] = x coord in gump
             // inputs[2] = y coord in gump
             // inputs[3] = image name
-            
-            var uoMarsPicControlBytes = Convert.FromBase64String(
-                File.ReadAllText(
-                    Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[3]}.uomgpic")    
-                )
-            );
+            try
+            {
+                var uoMarsPicControlBytes = Convert.FromBase64String(File.ReadAllText(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[3]}.uomgpic")));
+                _texture = Texture2D.FromStream(Client.Game.GraphicsDevice, new MemoryStream(uoMarsPicControlBytes));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Missing 'Gumps/{inputs[3]}.uomgpic' resource!");
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                return;
+            }
 
-            _texture = Texture2D.FromStream(Client.Game.GraphicsDevice, new MemoryStream(uoMarsPicControlBytes));
             X = Convert.ToInt32(inputs[1]);
             Y = Convert.ToInt32(inputs[2]);
             Width = _texture.Width;

@@ -27,21 +27,38 @@ namespace ClassicUO.Game.UI.Controls
             // inputs[3] = button id
             // inputs[4] = normal image name
             // inputs[5] = over/pressed image name
-            
-            var uoMarsPicControlBytesNormal = Convert.FromBase64String(
-                File.ReadAllText(
-                    Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[4]}.uomgpic")    
-                )
-            );
-            
-            var uoMarsPicControlBytesOver = Convert.FromBase64String(
-                File.ReadAllText(
-                    Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[5]}.uomgpic")    
-                )
-            );
 
-            _textureNormal = Texture2D.FromStream(Client.Game.GraphicsDevice, new MemoryStream(uoMarsPicControlBytesNormal));
-            _textureOver = Texture2D.FromStream(Client.Game.GraphicsDevice, new MemoryStream(uoMarsPicControlBytesOver));
+            try
+            {
+                var uoMarsPicControlBytesNormal = Convert.FromBase64String(File.ReadAllText(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[4]}.uomgpic")));
+                _textureNormal = Texture2D.FromStream(Client.Game.GraphicsDevice, new MemoryStream(uoMarsPicControlBytesNormal));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Missing 'Gumps/{inputs[4]}.uomgpic' resource!");
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                return;
+            }
+            
+            
+            try 
+            {
+                var uoMarsPicControlBytesOver = Convert.FromBase64String(
+                    File.ReadAllText(
+                        Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[5]}.uomgpic")    
+                    )
+                );
+                _textureOver = Texture2D.FromStream(Client.Game.GraphicsDevice, new MemoryStream(uoMarsPicControlBytesOver));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Missing 'Gumps/{inputs[5]}.uomgpic' resource!");
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                return;
+            }
+            
             _texture = _textureNormal;
             Width = _textureNormal.Width;
             Height = _textureNormal.Height;
