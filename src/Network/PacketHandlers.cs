@@ -6794,18 +6794,11 @@ namespace ClassicUO.Network
                 }
                 else if (string.Equals(entry, "uomarspiccontrol", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    int uoMarsPicControlX = Convert.ToInt32(gparams[1]);
-                    int uoMarsPicControlY = Convert.ToInt32(gparams[2]);
-                    string uoMarsPicControlFilename = gparams[3];
-                    
-                    string uoMarsPicControlPath = System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{uoMarsPicControlFilename}.txt");
-                    string uoMarsPicControlBase64 = System.IO.File.ReadAllText(uoMarsPicControlPath);
-                    var uoMarsPicControlBytes = Convert.FromBase64String(uoMarsPicControlBase64);
-            
-                    Stream uoMarsPicControlStream = new MemoryStream(uoMarsPicControlBytes);
-                    Texture2D uoMarsPicControlTexture = Texture2D.FromStream(Client.Game.GraphicsDevice, uoMarsPicControlStream);
-                    UoMarsPicControl uoMarsPicControlHanlder = new UoMarsPicControl(uoMarsPicControlX, uoMarsPicControlY, uoMarsPicControlTexture);
-                    gump.Add(uoMarsPicControlHanlder);
+                    gump.Add(new UoMarsPicControl(gparams));
+                }
+                else if (string.Equals(entry, "uomarsbuttoncontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsButtonControl(gparams));
                 }
                 else
                 {
