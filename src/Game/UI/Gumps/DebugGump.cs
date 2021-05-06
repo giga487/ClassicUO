@@ -52,6 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
+        private const string DEBUG_STRING_ZOOM = "- Zoom: {0}\n";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
@@ -164,10 +165,12 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
                 }
+                /*
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
                     sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
                 }
+                */
                 else
                 {
                     sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
