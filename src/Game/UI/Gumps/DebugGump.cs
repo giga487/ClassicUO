@@ -66,6 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const string DEBUG_STRING_PING_SMALL = "\nPing: {0} ms\n";
         /* */
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
+        private const string DEBUG_STRING_ZOOM = "- Zoom: {0}\n";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
@@ -146,13 +147,13 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     _sb.AppendFormat(DEBUG_STRING_PING, _ping);
+                    _sb.AppendFormat(DEBUG_STRING_ZOOM, !World.InGame ? 1f : scene.Camera.Zoom);
                     //_sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
                     //_sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
                     /* giga487 */
                     _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
-
                     //_sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
 
                     if (CUOEnviroment.Profiler)
@@ -186,15 +187,17 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
                 }
+                /*
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
                     _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
                 }
+                */
                 else
                 {
                     _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
                     _sb.AppendFormat(DEBUG_STRING_PING_SMALL, NetClient.Socket.Statistics.Ping);  /* giga487 */
-                    
+                    //_sb.AppendFormat(DEBUG_STRING_ZOOM, !World.InGame ? 1f : scene.Camera.Zoom); /* giga487 */
                 }
 
 
