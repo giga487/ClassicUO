@@ -57,11 +57,41 @@ namespace ClassicUO.Game.Managers
         private MacroObject _lastMacro;
         private long _nextTimer;
 
+        enum SkillMacro
+        {
+            Anatomy = 1,
+            AnimalLore = 2,
+            ItemId = 3,
+            AnimalTaming = 35,
+            ArmsLore = 4,
+            Begging = 6,
+            Cartoography = 12,
+            DetectHidden = 14,
+            Discordance = 15,
+            EvaInt = 16,
+            Forensic = 19,
+            Hiding = 21,
+            Inscription = 23,
+            Imbuing = 56,
+            Meditation = 46,
+            Parrying = 5,
+            Peacemaking = 9,
+            Poisoning = 30,
+            Provocation = 22,
+            Removetrap = 48,
+            SpiritSPeak = 32,
+            Stealing  = 33,
+            Stealth = 47,
+            TasteId = 36,
+            Tracking = 38
+        }
+
+
         private readonly byte[] _skillTable =
         {
             1, 2, 35, 4, 6, 12,
             14, 15, 16, 19, 21, 56 /*imbuing*/,
-            23, 3, 46, 9, 30, 22,
+            23, 3, 46, 5, 9, 30, 22,
             48, 32, 33, 47, 36, 38
         };
 
@@ -2047,7 +2077,7 @@ namespace ClassicUO.Game.Managers
         MysticismSpellbook,
         RacialAbilitiesBook,
         BardSpellbook,
-        Anatomy, //Skills group
+        Anatomy, //Skills group 
         AnimalLore,
         AnimalTaming,
         ArmsLore,
@@ -2062,6 +2092,7 @@ namespace ClassicUO.Game.Managers
         Inscription,
         ItemIdentification,
         Meditation,
+        Parryng,
         Peacemaking,
         Poisoning,
         Provocation,
