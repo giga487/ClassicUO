@@ -18,9 +18,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public UoMarsButtonControl(List<string> inputs)
         {
-            CanMove = true;
-            AcceptMouseInput = true;
-            
             // inputs[0] = UoMarsButtonControl
             // inputs[1] = x coord in gump
             // inputs[2] = y coord in gump
@@ -67,6 +64,12 @@ namespace ClassicUO.Game.UI.Controls
             Y = Convert.ToInt32(inputs[2]);
             ButtonId = Convert.ToInt32(inputs[3]);
             WantUpdateSize = false;
+            
+            WantUpdateSize = false;
+            IsFromServer = true;
+            CanMove = false;
+            AcceptMouseInput = true;
+            CanCloseWithEsc = false;
         }
         
         public override ClickPriority Priority => ClickPriority.High;

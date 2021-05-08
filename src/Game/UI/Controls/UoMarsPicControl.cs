@@ -29,7 +29,9 @@ namespace ClassicUO.Game.UI.Controls
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Missing 'Gumps/{inputs[3]}.uomgpic' resource!");
+                Console.WriteLine();
+                string path = Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, $"Gumps/{inputs[3]}.uomgpic");
+                Console.WriteLine($"Missing '{path}' resource!");
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
                 return;
@@ -40,21 +42,6 @@ namespace ClassicUO.Game.UI.Controls
             Width = _texture.Width;
             Height = _texture.Height;
             WantUpdateSize = false;
-        }
-        
-        public override ClickPriority Priority => ClickPriority.High;
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            if (button == MouseButtonType.Left)
-            {
-                if (Client.Game.Scene is GameScene)
-                {
-                    OnButtonClick(0);
-
-                    Mouse.LastLeftButtonClickTime = 0;
-                    Mouse.CancelDoubleClick = true;
-                }
-            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

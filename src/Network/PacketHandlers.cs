@@ -1293,7 +1293,7 @@ namespace ClassicUO.Network
             else
             {
                 string parentName = "";                  
-                bool checkSnooping = Convert.ToBoolean(p.ReadUShort() == 0x7D?0:1); // ok, se è 0x7d da pacchetto è zero, altrimenti è vero
+                bool checkSnooping = Convert.ToBoolean(p.ReadUShort() == 0x7D?0:1); // ok, se ï¿½ 0x7d da pacchetto ï¿½ zero, altrimenti ï¿½ vero
                 uint serialParent = p.ReadUInt();
                 Mobile parent = World.Mobiles.Get(serialParent);
 
@@ -6427,6 +6427,14 @@ namespace ClassicUO.Network
                 {
                     gump.Add(new Button(gparams), page);
                 }
+                else if (string.Equals(entry, "uomarsbuttoncontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsButtonControl(gparams), page);
+                }
+                else if (string.Equals(entry, "uomarsclickablehtml", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsClickableHtmlControl(gparams, lines), page);
+                }
                 else if (string.Equals(entry, "buttontileart", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.Add(new ButtonTileArt(gparams), page);
@@ -6794,11 +6802,31 @@ namespace ClassicUO.Network
                 }
                 else if (string.Equals(entry, "uomarspiccontrol", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    gump.Add(new UoMarsPicControl(gparams));
+                    gump.Add(new UoMarsPicControl(gparams), page);
                 }
-                else if (string.Equals(entry, "uomarsbuttoncontrol", StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(entry, "uomarstooltip", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    gump.Add(new UoMarsButtonControl(gparams));
+                    string text = gparams[1];
+                    Control last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
+
+                    if (last != null)
+                    {
+                        if (last.HasTooltip)
+                        {
+                            if (last.Tooltip is string s)
+                            {
+                                s += '\n' + text;
+                                last.SetTooltip(s);
+                            }
+                        }
+                        else
+                        {
+                            last.SetTooltip(text);
+                        }
+
+                        last.Priority = ClickPriority.High;
+                        last.AcceptMouseInput = true;
+                    }
                 }
                 else
                 {

@@ -40,7 +40,7 @@ namespace ClassicUO.Game
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValid(uint serial)
         {
-            return serial > 0 && serial < 4294967295; // guglielmo: first was 0x80000000, but was bugged for AddTooltip, we added the max uint value to fix the problem
+            return serial > 0 && serial < 0x80000000;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
