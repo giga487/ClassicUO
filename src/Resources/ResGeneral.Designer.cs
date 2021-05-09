@@ -19,7 +19,7 @@ namespace ClassicUO.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ResGeneral {
@@ -196,7 +196,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://classicuo.eu.
+        ///   Looks up a localized string similar to https://uomars.it.
         /// </summary>
         public static string ClassicUOLink {
             get {
@@ -269,7 +269,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CurrentProfile DateTime.Now is {0}.
+        ///   Looks up a localized string similar to Current DateTime.Now is {0}.
         /// </summary>
         public static string CurrentDateTimeNowIs0 {
             get {
@@ -1203,7 +1203,7 @@ namespace ClassicUO.Resources {
         ///   Looks up a localized string similar to Your Ultima Online client version seems to be invalid.
         ///Download the official Launcher to setup and run your game.
         ///
-        ///Link: classicuo.eu.
+        ///Invalid client executable.
         /// </summary>
         public static string YourUOClientVersionIsInvalid {
             get {
@@ -1215,7 +1215,7 @@ namespace ClassicUO.Resources {
         ///   Looks up a localized string similar to Your Ultima Online directory seems to be invalid.
         ///Download the official Launcher to setup and run your game.
         ///
-        ///Link: classicuo.eu.
+        ///Invalid server setup in settings.json.
         /// </summary>
         public static string YourUODirectoryIsInvalid {
             get {

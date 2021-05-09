@@ -44,16 +44,31 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using ClassicUO.Mars.EnhancedM;
+
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class TopBarGump : Gump
     {
+        EnhancedMapOpen exeEnhancedMap;
+        private bool mapInstalled = false;
+
+        enum labelBig
+        {
+            small = 0,
+            big = 1
+        }
+
         private TopBarGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+            exeEnhancedMap = new EnhancedMapOpen();
+
+            if (exeEnhancedMap.isMapInstalled)
+                mapInstalled = true;
 
             // little
             Add
@@ -92,29 +107,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 largeWidth = th2.Width;
             }
-
+            /* Giga487 */
             int[][] textTable =
             {
-                new[] { 0, (int) Buttons.Map },
-                new[] { 1, (int) Buttons.Paperdoll },
-                new[] { 1, (int) Buttons.Inventory },
-                new[] { 1, (int) Buttons.Journal },
-                new[] { 0, (int) Buttons.Chat },
-                new[] { 0, (int) Buttons.Help },
-                new[] { 1, (int) Buttons.WorldMap },
-                new[] { 0, (int) Buttons.Info },
-                new[] { 0, (int) Buttons.Debug },
-                new[] { 1, (int) Buttons.NetStats },
-
-                new[] { 1, (int) Buttons.UOStore },
-                new[] { 1, (int) Buttons.GlobalChat }
+                new [] {(int)labelBig.big, (int) Buttons.WorldMap },
+                new [] {(int)labelBig.big, (int) Buttons.Paperdoll },
+                new [] {(int)labelBig.big, (int) Buttons.Inventory },
+                new [] {(int)labelBig.big, (int) Buttons.Journal },
+                new [] {(int)labelBig.small, (int) Buttons.Chat },
+                //new [] {0, (int) Buttons.Help },
+                new [] {(int)labelBig.big, (int) Buttons.VendorSearch },
+                new [] {(int)labelBig.small, (int) Buttons.UOMarsBible },
+                new [] {(int)labelBig.small, (int) Buttons.UOMarsForum },
+                new [] {(int)labelBig.small, (int) Buttons.Debug },
+                new [] {(int)labelBig.big, (int) Buttons.EnhancedMap } //1 vuol dire che il tasto è grande, imbarazzo
+                //new [] {1, (int) Buttons.GlobalChat },
             };
 
             string[] texts =
             {
-                ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help,
-                ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore,
-                ResGumps.GlobalChat
+                ResGumps.WorldMap, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, "Vendor Search", "UO Bible", "Forum", "FPS","EnhancedMap"
             };
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
@@ -125,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 background = new ResizePic(0x13BE)
                 {
-                    Height = 27
+                    Height = 27,
                 },
                 1
             );
@@ -141,14 +153,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startX = 30;
 
-            for (int i = 0; i < textTable.Length; i++)
+            for (int i = 0; i < texts.Length; i++)
             {
+
+
+
                 if (!hasUOStore && i >= (int) Buttons.UOStore)
                 {
                     break;
                 }
 
                 ushort graphic = (ushort) (textTable[i][0] != 0 ? 0x098D : 0x098B);
+
+                if (mapInstalled == false && (texts[i] == "EnhancedMap"))
+                    continue;
 
                 Add
                 (
@@ -324,6 +342,22 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.OpenWorldMap();
 
                     break;
+
+                case Buttons.VendorSearch:
+                    GameActions.Say(".vendorsearch");
+                    break;
+                case Buttons.UOMarsBible:
+                    System.Diagnostics.Process.Start("https://uomars.it/bible");
+                    break;
+
+                case Buttons.UOMarsForum:
+                    System.Diagnostics.Process.Start("https://forum.uomars.it");
+                    break;
+
+                case Buttons.EnhancedMap:
+                    exeEnhancedMap.setStatus();
+                    break;
+
             }
         }
 
@@ -338,9 +372,13 @@ namespace ClassicUO.Game.UI.Gumps
             WorldMap,
             Info,
             Debug,
+            EnhancedMap,
             NetStats,
-            UOStore,
-            GlobalChat
+            GlobalChat,
+            VendorSearch,
+            UOMarsBible,
+            UOMarsForum,
+            UOStore            
         }
 
         private class RighClickableButton : Button

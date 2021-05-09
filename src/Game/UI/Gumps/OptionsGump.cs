@@ -343,6 +343,20 @@ namespace ClassicUO.Game.UI.Gumps
                 ) { ButtonParameter = 12 }
             );
 
+            Add
+            (
+                new NiceButton
+                (
+                    10,
+                    10 + 30 * i++,
+                    140,
+                    25,
+                    ButtonAction.SwitchPage,
+                    ResGumps.EnhancedMap
+                )
+                { ButtonParameter = 13 }
+            );
+
 
             Add
             (
@@ -419,6 +433,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildInfoBar();
             BuildContainers();
             BuildExperimental();
+            BuildEnhancedMap();
 
             ChangePage(1);
         }
@@ -2986,6 +3001,26 @@ namespace ClassicUO.Game.UI.Gumps
             startY += _disableAutoMove.Height + 2;
 
             Add(rightArea, PAGE);
+        }
+
+        private void BuildEnhancedMap() //Giga487
+        {
+            const int PAGE = 13;
+
+            ScrollArea rightArea = new ScrollArea
+            (
+                190,
+                20,
+                WIDTH - 210,
+                420,
+                true
+            );
+
+            int startX = 5;
+            int startY = 5;
+
+            Label text = AddLabel(rightArea, "STO CAZZO", startX, startY);        
+            startX += text.Width + 5;
         }
 
 

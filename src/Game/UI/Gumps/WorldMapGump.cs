@@ -1531,6 +1531,24 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
+        private Color getColor(uint serial) /* giga487, funzione che genera il colore della scritta sulla mappa */
+        {
+            if(World.Guild.Contains(serial))
+            {
+                return Color.Lime;
+            }
+            else if(World.Party.Contains(serial))
+            {
+                return Color.Yellow;
+            }
+            else
+            {
+                return Color.Aqua;
+            }
+
+
+        }
+
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
             if (_showMarkers && _mapMarkersLoaded)
@@ -1615,7 +1633,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    if (mob.NotorietyFlag != NotorietyFlag.Ally)
+                    if (mob.NotorietyFlag != NotorietyFlag.Ally) // TUTTO?
                     {
                         DrawMobile
                         (
@@ -1681,7 +1699,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-
+            
             foreach (WMapEntity wme in World.WMapManager.Entities.Values)
             {
                 if (wme.IsGuild && !World.Party.Contains(wme.Serial))
@@ -1698,9 +1716,10 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
             }
-
+            
             if (_showPartyMembers)
             {
+
                 for (int i = 0; i < 10; i++)
                 {
                     PartyMember partyMember = World.Party.Members[i];
@@ -1756,7 +1775,9 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
+
             }
+
 
             DrawMobile
             (
@@ -2127,6 +2148,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
+
         private void DrawMulti
         (
             UltimaBatcher2D batcher,
@@ -2185,6 +2207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _flipMap ? 45f : 0f
             );
         }
+
 
         private void DrawWMEntity
         (

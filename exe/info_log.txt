@@ -1,0 +1,21 @@
+
+
+15/03 Giga487:
+
+Modifiche varie del codice relativi ad alcuni indirizzi inseriti nel client.
+Sono stati inseriti all'interno del codice modifiche relative al vecchio client non generato da Giga487.
+Ho quindi preso lo stato attuale del client dal git ed ho implementato le modifiche passate.
+Eliminata la scelta delle razze alla creazione del personaggio.
+Corretta la scritta <out-of-bounds> sulla mappa quando si raggiunge una distanza > 25 tile.
+
+25/03
+fixate alcune skill e la visualizzazione.
+Deciso che verrà eliminato il file SkillGrp.MUL, è quindi da correggere la generazione dei gruppi di default 
+da MakeDefault.
+
+29/03
+Corretto fps e inserito il ping.
+
+15/04
+Modifica alla World Map che ora fornisce nome, posizione e vita dei membri del party.
+Sto lavorando sul party e sulla correzione dei bachi del software.

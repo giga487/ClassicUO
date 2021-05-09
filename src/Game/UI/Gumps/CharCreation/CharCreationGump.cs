@@ -39,6 +39,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO.Resources;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -64,7 +65,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public void SetCharacter(PlayerMobile character)
         {
             _character = character;
-            SetStep(CharCreationStep.ChooseProfession);
+            //SetStep(CharCreationStep.ChooseProfession);
+
+            ProfessionInfo parent = null;
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
+            SetProfession(professions[0]);
+            SetCity(0);
+            CreateCharacter((byte)_selectedProfession.DescriptionIndex);
+            IsVisible = false;
         }
 
         public void SetAttributes(bool force = false)

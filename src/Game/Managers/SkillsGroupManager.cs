@@ -260,7 +260,8 @@ namespace ClassicUO.Game.Managers
                     {
                         foreach (XmlElement xmlIds in xmlIdsRoot.GetElementsByTagName("skill"))
                         {
-                            g.Add(byte.Parse(xmlIds.GetAttribute("id")));
+                            var auto = byte.Parse(xmlIds.GetAttribute("id"));
+                            g.Add(auto);
                         }
                     }
 
@@ -296,10 +297,15 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void MakeDefault()
+        public static void MakeDefault()  /* giga487 */
         {
             Groups.Clear();
 
+            MakeDefaultAggressiveSkills();
+            MakeDefaultDefensiveSkills();
+            MakeDefaultWorkerSkills();
+            MakeDefaultUtilitieSkills();
+            /*
             if (!LoadMULFile(UOFileManager.GetUOFilePath("skillgrp.mul")))
             {
                 MakeDefaultMiscellaneous();
@@ -310,7 +316,7 @@ namespace ClassicUO.Game.Managers
                 MakeDefaultThieving();
                 MakeDefaultBard();
             }
-
+            */
             foreach (SkillsGroup g in Groups)
             {
                 g.Sort();
@@ -327,9 +333,9 @@ namespace ClassicUO.Game.Managers
             g.Add(6);
             g.Add(10);
             g.Add(12);
-            g.Add(19);
-            g.Add(3);
-            g.Add(36);
+            g.Add(19); // Herding?
+            g.Add(3);  // Item ID
+            g.Add(36); //Tinkering
 
             Add(g);
         }
@@ -340,7 +346,6 @@ namespace ClassicUO.Game.Managers
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Combat;
-            g.Add(1);
             g.Add(31);
             g.Add(42);
             g.Add(17);
@@ -379,6 +384,84 @@ namespace ClassicUO.Game.Managers
             Add(g);
         }
 
+        /* GRUPPI SKILLS UO MARS */
+        private static void MakeDefaultWorkerSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Worker";
+            g.Add(0);
+            g.Add(35);
+            g.Add(7);
+            g.Add(8);
+            g.Add(11); //Carpentry
+            g.Add(60); // Harvestring
+            g.Add(44); // Lumberjacking
+            g.Add(45);
+            g.Add(59); 
+            g.Add(34);
+            g.Add(37);
+
+            Add(g);
+        }
+
+        private static void MakeDefaultAggressiveSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Aggressive";
+            g.Add(1);
+            g.Add(31);
+            g.Add(58); //bombering
+            g.Add(16);
+            g.Add(42); //fencing
+            g.Add(19); //Forensic
+            g.Add(41); //mace 
+            g.Add(25); //magery 
+            g.Add(30);  
+            g.Add(40);
+            g.Add(27);
+
+            Add(g);
+        }
+
+        private static void MakeDefaultUtilitieSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Utilities";
+            g.Add(2);
+            g.Add(15); //disco
+            g.Add(50); //focus
+            g.Add(23); 
+            g.Add(24); //lockpicking
+            g.Add(46); //Med
+            g.Add(29); // Musicianship
+            g.Add(9);  //peace
+            g.Add(22); // provo
+            g.Add(28); //snooping
+            g.Add(33); //stealing
+            g.Add(57);
+            g.Add(38);
+            g.Add(39); //vet
+
+            Add(g);
+        }
+
+        private static void MakeDefaultDefensiveSkills()
+        {
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Defensive";
+            g.Add(14); //Detect Hidden
+            g.Add(17);
+            g.Add(21);
+            g.Add(5); //Parry
+            g.Add(26);
+            g.Add(47); //Stealth
+            g.Add(43);
+
+            Add(g);
+        }
+
+
+
         private static void MakeDefaultTradeSkills()
         {
             SkillsGroup g = new SkillsGroup();
@@ -393,6 +476,7 @@ namespace ClassicUO.Game.Managers
             g.Add(45);
             g.Add(34);
             g.Add(37);
+            g.Add(58);
 
             Add(g);
         }

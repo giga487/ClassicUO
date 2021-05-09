@@ -166,6 +166,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
+            /*  tolta la selezione degli umani */
+            /*
             // Races
             Add
             (
@@ -223,6 +225,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     1
                 );
             }
+            */
 
             // Prev/Next
             Add
@@ -243,8 +246,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
+            /*
+            _maleRadio.IsChecked = true;
+            //_humanRadio.IsChecked = true; giga487, ho tolto la selezione della razza, quindi ho dovuto unflaggare questo 
+            */
             _maleRadio.IsClicked = true;
-            _humanRadio.IsClicked = true;
+            //_humanRadio.IsClicked = true;
             _characterInfo.IsFemale = false;
             _characterInfo.Race = RaceType.HUMAN;
 
@@ -785,6 +792,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private bool ValidateCharacter(PlayerMobile character)
         {
             int invalid = Validate(character.Name);
+
             if (invalid > 0)
             {
                 UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(invalid));
@@ -799,6 +807,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, Client.Version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
         }
+
 
         public static int Validate(string name, int minLength, int maxLength, bool allowLetters, bool allowDigits, bool noExceptionsAtStart, int maxExceptions, char[] exceptions, string[] disallowed, string[] startDisallowed)
         {

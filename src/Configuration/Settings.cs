@@ -83,7 +83,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("login_music")] public bool LoginMusic { get; set; } = true;
 
-        [JsonProperty("login_music_volume")] public int LoginMusicVolume { get; set; } = 70;
+        [JsonProperty("login_music_volume")] public int LoginMusicVolume { get; set; } = 20;
 
         [JsonProperty("shard_type")] public int ShardType { get; set; } // 0 = normal (no customization), 1 = old, 2 = outlands??
 

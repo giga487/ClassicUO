@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Utility;
+using System.Linq;
 
 namespace ClassicUO.IO.Resources
 {
@@ -53,6 +54,7 @@ namespace ClassicUO.IO.Resources
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
 
+        string[] skillUseless = { "Bushido", "Ninjitsu", "Spellweaving", "Disarm", "Enticement", "Chivalry", "Necromancy", "Fishing", "Mysticism","Imbuing"};
         public override Task Load()
         {
             return Task.Run
@@ -84,9 +86,15 @@ namespace ClassicUO.IO.Resources
                             bool hasAction = _file.ReadBool();
 
                             string name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
-
+                            
+                            /*
+                            if(skillUseless.Contains(name))  // giga487, UoMars
+                            {
+                                continue;  // se carico le skill che ho messo dentro il vettore string skillUseless vado avanti.
+                            }
+                            */
+                            
                             SkillEntry skill = new SkillEntry(count++, name, hasAction);
-
                             Skills.Add(skill);
                         }
                     }
@@ -146,7 +154,8 @@ namespace ClassicUO.IO.Resources
             Enticement,
             EvaluateIntelligence,
             Healing,
-            Fishing,
+            Harvesting,
+            //Fishing,
             ForensicEvaluation,
             Herding,
             Hiding,
@@ -180,7 +189,8 @@ namespace ClassicUO.IO.Resources
             Necromancy,
             Focus,
             Chivalry,
-            Bushido,
+            Bomber, /* Giga487 */
+            //Bushido,
             Ninjitsu,
             Spellweaving
         }

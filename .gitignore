@@ -10,6 +10,7 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+.github/
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -264,3 +265,6 @@ paket.lock
 __pycache__/
 *.pyc
 /.svn
+
+/Fiddler
+*.bak

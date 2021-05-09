@@ -50,20 +50,26 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private long _corpseEyeTicks;
         private ContainerData _data;
+        private ContainerData _nameGump;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
-        private GumpPicContainer _gumpPicContainer;
+        private GumpPicContainer _gumpPicContainer; 
+        private GumpPicContainer _gumpNomeContainer;
         private readonly bool _hideIfEmpty;
         private HitBox _hitBox;
         private bool _isMinimized;
-
+        private Item item;
+        private Mobile _parent;
+        private Label _titleLabel;
         public ContainerGump() : base(0, 0)
         {
         }
 
-        public ContainerGump(uint serial, ushort gumpid, bool playsound) : base(serial, 0)
+        public ContainerGump(uint serial, ushort gumpid, bool playsound, Mobile parent = null) : base(serial, 0)
         {
-            Item item = World.Items.Get(serial);
+            item = World.Items.Get(serial);
+ 
+            _parent = parent;
 
             if (item == null)
             {
@@ -71,6 +77,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return;
             }
+
+            ContainerGump nameGump = new ContainerGump();
 
             Graphic = gumpid;
 
@@ -180,6 +188,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return;
             }
+            ushort ng = 0;
+            if (_parent != null) // se non c'è il nome
+            {
+                _nameGump = ContainerManager.Get(0x9C5); //Perfetto 142,21
+                ng = _nameGump.Graphic;
+                _gumpNomeContainer?.Dispose();
+            }
 
             float scale = GetScale();
 
@@ -188,6 +203,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _gumpPicContainer?.Dispose();
+
+
             _hitBox?.Dispose();
 
             _hitBox = new HitBox((int) (_data.MinimizerArea.X * scale), (int) (_data.MinimizerArea.Y * scale), (int) (_data.MinimizerArea.Width * scale), (int) (_data.MinimizerArea.Height * scale));
@@ -198,6 +215,22 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0));
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
 
+
+            if (_parent != null)
+            {
+                Add(_gumpNomeContainer = new GumpPicContainer(_data.Bounds.Width/2 - 60 , _data.Bounds.Y - 50, ng, 0));
+
+                string nameBP = _parent.Name + "'s bag";
+                _titleLabel = new Label(nameBP, false, 0x0386, 185)
+                {
+                    X = _gumpNomeContainer.Bounds.X + 10,
+                    Y = _gumpNomeContainer.Bounds.Center.Y - 5
+                };
+
+                Add(_titleLabel);
+
+            }
+
             if (Graphic == 0x0009)
             {
                 _eyeGumpPic?.Dispose();
@@ -206,7 +239,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Width = (int) (_eyeGumpPic.Width * scale);
                 _eyeGumpPic.Height = (int) (_eyeGumpPic.Height * scale);
             }
-
 
             Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
@@ -592,6 +624,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ResetHueVector();
 
+                /*
                 batcher.DrawRectangle
                 (
                     SolidColorTextureCache.GetTexture(Color.Red),
@@ -601,6 +634,10 @@ namespace ClassicUO.Game.UI.Gumps
                     boundHeight - boundY,
                     ref HueVector
                 );
+                */
+
+
+
             }
 
             return true;

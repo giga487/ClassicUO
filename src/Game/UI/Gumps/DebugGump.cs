@@ -40,23 +40,45 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Managers;
+using ClassicUO.Network;
+using System.Collections.Generic;
+using System.Linq;
+
+
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
+        /*
         private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
-
+        */
+        /* UO Mars Debug, Giga487 */
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2})\n";
+        private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
+        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- MousePosAbs: {2}\n";
+        private const string DEBUG_STRING_3 = "- Selected: {0}"; 
+        private const string DEBUG_STRING_PING = "- Ping: {0} ms\n";
+        private const string DEBUG_STRING_PING_SMALL = "\nPing: {0} ms\n";
+        /* */
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
+        private const string DEBUG_STRING_ZOOM = "- Zoom: {0}\n";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
         private readonly StringBuilder _sb = new StringBuilder();
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
+
+        static private List<float> alphaPossibleValue = new List<float>(){ 0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f,0.7f, 0.8f, 0.9f, 1.0f };
+        int size_alphaPossibleValue = alphaPossibleValue.Count;
+        private float alpha = alphaPossibleValue.ElementAt(0);
+
+        private uint _ping;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -73,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _alphaBlendControl = new AlphaBlendControl(.3f)
+                _alphaBlendControl = new AlphaBlendControl(alpha)
                 {
                     Width = Width, Height = Height
                 }
@@ -99,10 +121,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             return false;
         }
-
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
+            _ping = NetClient.Socket.Statistics.Ping;
 
             if (Time.Ticks > _timeToUpdate)
             {
@@ -113,6 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (IsMinimized && scene != null)
                 {
+
                     _sb.AppendFormat
                     (
                         DEBUG_STRING_0,
@@ -123,12 +146,15 @@ namespace ClassicUO.Game.UI.Gumps
                         scene.RenderedObjectsCount
                     );
 
-                    _sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
+                    _sb.AppendFormat(DEBUG_STRING_PING, _ping);
+                    _sb.AppendFormat(DEBUG_STRING_ZOOM, !World.InGame ? 1f : scene.Camera.Zoom);
+                    //_sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
+                    //_sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
+                    /* giga487 */
                     _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
-
-                    _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
+                    //_sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
 
                     if (CUOEnviroment.Profiler)
                     {
@@ -161,20 +187,25 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
                 }
+                /*
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
                     _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
                 }
+                */
                 else
                 {
                     _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
+                    _sb.AppendFormat(DEBUG_STRING_PING_SMALL, NetClient.Socket.Statistics.Ping);  /* giga487 */
+                    //_sb.AppendFormat(DEBUG_STRING_ZOOM, !World.InGame ? 1f : scene.Camera.Zoom); /* giga487 */
                 }
 
 
                 Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _alphaBlendControl.Width = Width = (int) (size.X + 20);
-                _alphaBlendControl.Height = Height = (int) (size.Y + 20);
+                //_alphaBlendControl.Height = Height = (int) (size.Y + 20);
+                _alphaBlendControl.Height = Height = (int)(size.Y);
 
                 WantUpdateSize = true;
             }
@@ -255,6 +286,38 @@ namespace ClassicUO.Game.UI.Gumps
 
             _last_position.X = ScreenCoordinateX;
             _last_position.Y = ScreenCoordinateY;
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            alpha += 0.1f;
+            base.OnButtonClick(buttonID);
+        }
+
+        /* giga487, vado a variare l'intensità dell'ombra del gump PING/FPS */
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            int index = alphaPossibleValue.IndexOf(alpha);
+
+            bool last = index == size_alphaPossibleValue - 1;
+            bool first = index == 0;
+
+            switch (delta)
+            {
+                case MouseEventType.WheelScrollUp:
+                    alpha = last?alphaPossibleValue.ElementAt(index):alphaPossibleValue.ElementAt(index + 1);
+
+                    break;
+
+                case MouseEventType.WheelScrollDown:
+                    alpha = first ?alphaPossibleValue.ElementAt(index):alphaPossibleValue.ElementAt(index - 1);
+
+                    break;
+            }
+
+            _alphaBlendControl.SetAlphaBlendControl(alpha);
+
+
         }
     }
 }

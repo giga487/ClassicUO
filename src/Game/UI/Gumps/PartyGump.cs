@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new GumpPic(130, yPtr, 0x0475, 0));
 
-                string name = "";
+                string name = ""; /* questo è un parametro di default, in pratica */
 
                 if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
                 {

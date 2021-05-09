@@ -655,6 +655,10 @@ namespace ClassicUO.Game.UI.Controls
             y = y - Y - ParentY;
             OnMove(x, y);
         }
+/*        public void invokemouseclick(mouseeventtype mouseclick )
+        {
+            mouseclick.
+        }*/
 
         protected virtual void OnMouseDown(int x, int y, MouseButtonType button)
         {

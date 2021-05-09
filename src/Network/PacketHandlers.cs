@@ -56,6 +56,10 @@ using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Media;
+using ClassicUO.Game.UoMars;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Media;
 
 namespace ClassicUO.Network
 {
@@ -219,6 +223,8 @@ namespace ClassicUO.Network
             Handlers.Add(0x82, ReceiveLoginRejection);
             Handlers.Add(0x85, ReceiveLoginRejection);
             Handlers.Add(0x53, ReceiveLoginRejection);
+
+
         }
 
 
@@ -1200,7 +1206,6 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
             ushort graphic = p.ReadUShort();
 
-
             if (graphic == 0xFFFF)
             {
                 Item spellBookItem = World.Items.Get(serial);
@@ -1288,6 +1293,11 @@ namespace ClassicUO.Network
             }
             else
             {
+                string parentName = "";                  
+                bool checkSnooping = Convert.ToBoolean(p.ReadUShort() == 0x7D?0:1); // ok, se � 0x7d da pacchetto � zero, altrimenti � vero
+                uint serialParent = p.ReadUInt();
+                Mobile parent = World.Mobiles.Get(serialParent);
+
                 Item item = World.Items.Get(serial);
 
                 if (item != null)
@@ -1404,10 +1414,9 @@ namespace ClassicUO.Network
                         playsound = true;
                     }
 
-
                     UIManager.Add
                     (
-                        new ContainerGump(item, graphic, playsound)
+                        new ContainerGump(item, graphic, playsound, checkSnooping?parent:null)
                         {
                             X = x,
                             Y = y,
@@ -4084,7 +4093,14 @@ namespace ClassicUO.Network
                     World.Party.ParsePacket(ref p);
 
                     break;
+/*
+                // Messaggio 0xBF 0xD7 0 COUNT NOME SERIALE, NOME SERIALE, NOME SERIALE,, aggiun
+                // Messaggio 0xBF 0xD7 1 Seriale N
+                case 0xD7: //guild member Giga487
+                    World.Guild.ParsePacket(ref p);
 
+                    break;
+*/
                 //===========================================================================================
                 //===========================================================================================
                 case 8: // map change
@@ -5461,7 +5477,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
         }
 
-        private static void KrriosClientSpecial(ref PacketBufferReader p)
+        private static void KrriosClientSpecial(ref PacketBufferReader p) // 0xF0
         {
             byte type = p.ReadByte();
 
@@ -5480,6 +5496,8 @@ namespace ClassicUO.Network
 
                     uint serial;
 
+                    //World.Party.ResetArrayWithouthSelf(); //Giga487, annulla gli elementi
+
                     while ((serial = p.ReadUInt()) != 0)
                     {
                         if (locations)
@@ -5487,8 +5505,32 @@ namespace ClassicUO.Network
                             ushort x = p.ReadUShort();
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
-                            int hits = type == 1 ? 0 : p.ReadByte();
+                            string name = p.ReadUnicode();
 
+                            // giga487, inserisce qui l'insieme degli elementi
+
+                            //int hits = type == 1 ? 0 : p.ReadByte();
+                            int hits = p.ReadByte();
+
+                            if(type == 0x01 )
+                            {
+                                World.Party.InsertPartyElement(serial, name);
+                                //Members[i] = new PartyMember(serial);
+                            }
+
+                            World.WMapManager.AddOrUpdate
+                            (
+                                serial,
+                                x,
+                                y,
+                                hits,
+                                map,
+                                type == 0x02,
+                                name,
+                                true
+                            ); ;
+
+                            /*
                             World.WMapManager.AddOrUpdate
                             (
                                 serial,
@@ -5500,12 +5542,15 @@ namespace ClassicUO.Network
                                 null,
                                 true
                             );
+                            */
+
                         }
                     }
 
                     World.WMapManager.RemoveUnupdatedWEntity();
 
                     break;
+
 
                 case 0x03: // runebook contents
                     break;
@@ -5522,6 +5567,7 @@ namespace ClassicUO.Network
                     break;
             }
         }
+
 
         private static void FreeshardListR(ref PacketBufferReader p)
         {
@@ -6421,6 +6467,14 @@ namespace ClassicUO.Network
                 {
                     gump.Add(new Button(gparams), page);
                 }
+                else if (string.Equals(entry, "uomarsbuttoncontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsButtonControl(gparams), page);
+                }
+                else if (string.Equals(entry, "uomarsclickablehtml", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsClickableHtmlControl(gparams, lines), page);
+                }
                 else if (string.Equals(entry, "buttontileart", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.Add(new ButtonTileArt(gparams), page);
@@ -6785,6 +6839,34 @@ namespace ClassicUO.Network
                 else if (string.Equals(entry, "mastergump", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
+                }
+                else if (string.Equals(entry, "uomarspiccontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsPicControl(gparams), page);
+                }
+                else if (string.Equals(entry, "uomarstooltip", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    string text = gparams[1];
+                    Control last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
+
+                    if (last != null)
+                    {
+                        if (last.HasTooltip)
+                        {
+                            if (last.Tooltip is string s)
+                            {
+                                s += '\n' + text;
+                                last.SetTooltip(s);
+                            }
+                        }
+                        else
+                        {
+                            last.SetTooltip(text);
+                        }
+
+                        last.Priority = ClickPriority.High;
+                        last.AcceptMouseInput = true;
+                    }
                 }
                 else
                 {

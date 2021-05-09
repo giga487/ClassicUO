@@ -45,6 +45,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using SDL2;
+using System.Text;
 
 namespace ClassicUO
 {
@@ -55,6 +56,11 @@ namespace ClassicUO
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
+#if DEBUG
+        /* Giga487, mi permette di visualizzare la console se debug */
+        [DllImport("kernel32.dll")]  public static extern Boolean AllocConsole();
+        [DllImport("kernel32.dll")] public static extern Boolean FreeConsole();
+#endif
 
         [STAThread]
         public static void Main(string[] args)
@@ -62,6 +68,9 @@ namespace ClassicUO
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             Log.Start(LogTypes.All);
+#if DEBUG   
+            AllocConsole();  /* GIGA487, alloca la console */
+#endif
 
             CUOEnviroment.GameThread = Thread.CurrentThread;
             CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
