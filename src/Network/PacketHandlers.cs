@@ -6837,7 +6837,11 @@ namespace ClassicUO.Network
                 }
                 else if (string.Equals(entry, "uomarstooltip", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    string text = gparams[1];
+                    string text = gparams.ElementAtOrDefault(1);
+
+                    if (text == null)
+                        text = "";
+                    
                     Control last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
 
                     if (last != null)
