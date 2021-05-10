@@ -2055,7 +2055,7 @@ namespace ClassicUO.Network
                 Client.Game.SetScene(scene);
 
                 //GameActions.OpenPaperdoll(World.Player);
-                GameActions.RequestMobileStatus(World.Player);
+                GameActions.RequestMobileStatus(World.Player, true);
                 NetClient.Socket.Send(new POpenChat(""));
 
 
