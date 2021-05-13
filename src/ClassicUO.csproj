@@ -56,6 +56,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />
+    <EmbeddedResource Include="profile.json" />
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
@@ -80,14 +81,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\ResErrorMessages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -106,6 +108,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\ResErrorMessages.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ResErrorMessages.Designer.cs</LastGenOutput>
@@ -126,6 +132,17 @@
     <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
     <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
     <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\icd.d\*.*" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Remove="gumps.xml" />
+    <None Remove="profile.json" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Include="gumps.xml" />
   </ItemGroup>
 
 

@@ -31,9 +31,11 @@
 #endregion
 
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using ClassicUO.Utility.Logging;
 using TinyJson;
+using System;
 
 namespace ClassicUO.Configuration
 {
@@ -41,14 +43,29 @@ namespace ClassicUO.Configuration
     {
         public static T Load<T>(string file) where T : class
         {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resName = "ClassicUO.profile.json";
+            string text;
+
+            string[] resources = assembly.GetManifestResourceNames();
+
+            int index = Array.IndexOf(resources, resName);
+
             if (!File.Exists(file))
             {
-                Log.Warn(file + " not found.");
+                Stream stream = assembly.GetManifestResourceStream(resources[index]);
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    text = reader.ReadToEnd();
+                }
 
-                return null;
+            }
+            else
+            {
+                text = File.ReadAllText(file);
             }
 
-            string text = File.ReadAllText(file);
+
 
             text = Regex.Replace
             (
@@ -64,6 +81,8 @@ namespace ClassicUO.Configuration
 
             return settings;
         }
+
+
 
         public static void Save<T>(T obj, string file) where T : class
         {
