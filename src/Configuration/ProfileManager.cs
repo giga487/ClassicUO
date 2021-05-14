@@ -64,9 +64,15 @@ namespace ClassicUO.Configuration
             CurrentProfile.ServerName = servername;
             CurrentProfile.CharacterName = charactername;
 
+            ScreenUtils monitor = new ScreenUtils();
+
+            if(monitor.Screen.Height <= 1080) // Se hai un monitor con una risoluzione minore, cambialo.
+            {
+                CurrentProfile.GameWindowSize = new Point(600, 480);
+            }
+
             ValidateFields(CurrentProfile);
         }
-
 
         private static void ValidateFields(Profile profile)
         {
@@ -106,4 +112,45 @@ namespace ClassicUO.Configuration
             CurrentProfile = null;
         }
     }
+
+    public class ScreenUtils
+    {
+        public ScreenDim Screen;
+        public ScreenUtils()
+        {
+            Screen = GetPrimaryScreenResolution();
+        }
+
+        public static ScreenDim GetPrimaryScreenResolution()
+        {
+            var screen = System.Windows.Forms.Screen.AllScreens;
+
+            ScreenDim dimScreen = new ScreenDim(screen[0].Bounds.Height, screen[0].Bounds.Width); //Nel caso ce ne fosse uno
+
+            foreach (var sc in screen)
+            {
+                if (sc.Primary)
+                {
+                    dimScreen = new ScreenDim(sc.Bounds.Height, sc.Bounds.Width);
+                    return dimScreen;
+                }
+            }
+
+            return dimScreen;
+
+        }
+
+        public struct ScreenDim
+        {
+            public ScreenDim(int height, int width)
+            {
+                Height = height;
+                Width = width;
+            }
+
+            public int Height { get; }
+            public int Width { get; }
+        }
+    }
+
 }

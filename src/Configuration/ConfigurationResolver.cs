@@ -36,6 +36,8 @@ using System.Text.RegularExpressions;
 using ClassicUO.Utility.Logging;
 using TinyJson;
 using System;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace ClassicUO.Configuration
 {
@@ -46,7 +48,6 @@ namespace ClassicUO.Configuration
             var assembly = Assembly.GetExecutingAssembly();
             var resName = "ClassicUO.profile.json";
             string text;
-
             string[] resources = assembly.GetManifestResourceNames();
 
             int index = Array.IndexOf(resources, resName);
@@ -54,11 +55,11 @@ namespace ClassicUO.Configuration
             if (!File.Exists(file))
             {
                 Stream stream = assembly.GetManifestResourceStream(resources[index]);
+
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     text = reader.ReadToEnd();
                 }
-
             }
             else
             {
@@ -79,6 +80,8 @@ namespace ClassicUO.Configuration
 
             T settings = text.Decode<T>();
 
+
+
             return settings;
         }
 
@@ -96,5 +99,6 @@ namespace ClassicUO.Configuration
                 Log.Error(e.ToString());
             }
         }
+
     }
 }

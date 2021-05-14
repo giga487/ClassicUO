@@ -441,7 +441,7 @@ namespace ClassicUO.Configuration
             List<Gump> gumps = new List<Gump>();
             // load skillsgroup
             SkillsGroupManager.Load();
-
+            string resName;
             // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
 
@@ -464,7 +464,17 @@ namespace ClassicUO.Configuration
             {
 
                 var assembly = Assembly.GetExecutingAssembly();
-                var resName = "ClassicUO.gumps.xml";
+
+                ScreenUtils monitor = new ScreenUtils();
+                if(monitor.Screen.Height >= 1080)
+                {
+                    resName = "ClassicUO.gumps4k.xml";
+                }
+                else
+                {
+                    resName = "ClassicUO.gumpsLowRes.xml";
+                }
+
 
                 string[] resources = assembly.GetManifestResourceNames();
 
@@ -495,7 +505,7 @@ namespace ClassicUO.Configuration
                         int x = int.Parse(xml.GetAttribute(nameof(x)));
                         int y = int.Parse(xml.GetAttribute(nameof(y)));
                         uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
-
+                        
                         Gump gump = null;
 
                         switch (type)
@@ -729,5 +739,6 @@ namespace ClassicUO.Configuration
             return gumps;
 
         }
+
     }
 }
