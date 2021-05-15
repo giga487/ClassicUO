@@ -218,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_parent != null)
             {
-                Add(_gumpNomeContainer = new GumpPicContainer(_data.Bounds.Width/2 - 60 , _data.Bounds.Y - 50, ng, 0));
+                Add(_gumpNomeContainer = new GumpPicContainer(_data.Bounds.Width/2 - 50 , _data.Bounds.Y - 50, ng, 0));
 
                 string nameBP = _parent.Name + "'s bag";
                 _titleLabel = new Label(nameBP, false, 0x0386, 185)

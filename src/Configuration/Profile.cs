@@ -43,6 +43,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using TinyJson;
+using System.Reflection;
 
 namespace ClassicUO.Configuration
 {
@@ -438,17 +439,16 @@ namespace ClassicUO.Configuration
         public List<Gump> ReadGumps(string path)
         {
             List<Gump> gumps = new List<Gump>();
-
             // load skillsgroup
             SkillsGroupManager.Load();
-
+            string resName;
             // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
 
+            XmlDocument doc = new XmlDocument();
+
             if (File.Exists(gumpsXmlPath))
             {
-                XmlDocument doc = new XmlDocument();
-
                 try
                 {
                     doc.Load(gumpsXmlPath);
@@ -459,41 +459,227 @@ namespace ClassicUO.Configuration
 
                     return gumps;
                 }
+            }
+            else
+            {
 
-                XmlElement root = doc["gumps"];
+                var assembly = Assembly.GetExecutingAssembly();
 
-                if (root != null)
+                ScreenUtils monitor = new ScreenUtils();
+                if(monitor.Screen.Height >= 1080)
                 {
-                    foreach (XmlElement xml in root.ChildNodes /*.GetElementsByTagName("gump")*/)
+                    resName = "ClassicUO.gumps4k.xml";
+                }
+                else
+                {
+                    resName = "ClassicUO.gumpsLowRes.xml";
+                }
+
+
+                string[] resources = assembly.GetManifestResourceNames();
+
+                int index = Array.IndexOf(resources, resName);
+                string name = resources[index];
+                Stream stream = assembly.GetManifestResourceStream(name);
+                using (StreamReader reader = new StreamReader(stream))
+                {
+
+                    doc.LoadXml(reader.ReadToEnd());
+                }
+            }
+
+            XmlElement root = doc["gumps"];
+
+            if (root != null)
+            {
+                foreach (XmlElement xml in root.ChildNodes /*.GetElementsByTagName("gump")*/)
+                {
+                    if (xml.Name != "gump")
                     {
-                        if (xml.Name != "gump")
+                        continue;
+                    }
+
+                    try
+                    {
+                        GumpType type = (GumpType)int.Parse(xml.GetAttribute(nameof(type)));
+                        int x = int.Parse(xml.GetAttribute(nameof(x)));
+                        int y = int.Parse(xml.GetAttribute(nameof(y)));
+                        uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
+                        
+                        Gump gump = null;
+
+                        switch (type)
+                        {
+                            case GumpType.Buff:
+                                gump = new BuffGump();
+
+                                break;
+
+                            case GumpType.Container:
+                                gump = new ContainerGump();
+
+                                break;
+
+                            case GumpType.CounterBar:
+                                gump = new CounterBarGump();
+
+                                break;
+
+                            case GumpType.HealthBar:
+                                if (CustomBarsToggled)
+                                {
+                                    gump = new HealthBarGumpCustom();
+                                }
+                                else
+                                {
+                                    gump = new HealthBarGump();
+                                }
+
+                                break;
+
+                            case GumpType.InfoBar:
+                                gump = new InfoBarGump();
+
+                                break;
+
+                            case GumpType.Journal:
+                                gump = new JournalGump();
+
+                                break;
+
+                            case GumpType.MacroButton:
+                                gump = new MacroButtonGump();
+
+                                break;
+
+                            case GumpType.MiniMap:
+                                gump = new MiniMapGump();
+
+                                break;
+
+                            case GumpType.PaperDoll:
+                                gump = new PaperDollGump();
+
+                                break;
+
+                            case GumpType.SkillMenu:
+                                if (StandardSkillsGump)
+                                {
+                                    gump = new StandardSkillsGump();
+                                }
+                                else
+                                {
+                                    gump = new SkillGumpAdvanced();
+                                }
+
+                                break;
+
+                            case GumpType.SpellBook:
+                                gump = new SpellbookGump();
+
+                                break;
+
+                            case GumpType.StatusGump:
+                                gump = StatusGumpBase.AddStatusGump(0, 0);
+
+                                break;
+
+                            //case GumpType.TipNotice:
+                            //    gump = new TipNoticeGump();
+                            //    break;
+                            case GumpType.AbilityButton:
+                                gump = new UseAbilityButtonGump();
+
+                                break;
+
+                            case GumpType.SpellButton:
+                                gump = new UseSpellButtonGump();
+
+                                break;
+
+                            case GumpType.SkillButton:
+                                gump = new SkillButtonGump();
+
+                                break;
+
+                            case GumpType.RacialButton:
+                                gump = new RacialAbilityButton();
+
+                                break;
+
+                            case GumpType.WorldMap:
+                                gump = new WorldMapGump();
+
+                                break;
+
+                            case GumpType.Debug:
+                                gump = new DebugGump(100, 100);
+
+                                break;
+
+                            case GumpType.NetStats:
+                                gump = new NetworkStatsGump(100, 100);
+
+                                break;
+                        }
+
+                        if (gump == null)
                         {
                             continue;
                         }
 
+                        gump.LocalSerial = serial;
+                        gump.Restore(xml);
+                        gump.X = x;
+                        gump.Y = y;
+
+                        if (gump.LocalSerial != 0)
+                        {
+                            UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+                        }
+
+                        if (!gump.IsDisposed)
+                        {
+                            gumps.Add(gump);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                }
+
+                foreach (XmlElement group in root.GetElementsByTagName("anchored_group_gump"))
+                {
+                    int matrix_width = int.Parse(group.GetAttribute("matrix_w"));
+                    int matrix_height = int.Parse(group.GetAttribute("matrix_h"));
+
+                    AnchorManager.AnchorGroup ancoGroup = new AnchorManager.AnchorGroup();
+                    ancoGroup.ResizeMatrix(matrix_width, matrix_height, 0, 0);
+
+                    foreach (XmlElement xml in group.GetElementsByTagName("gump"))
+                    {
                         try
                         {
-                            GumpType type = (GumpType) int.Parse(xml.GetAttribute(nameof(type)));
-                            int x = int.Parse(xml.GetAttribute(nameof(x)));
-                            int y = int.Parse(xml.GetAttribute(nameof(y)));
-                            uint serial = uint.Parse(xml.GetAttribute(nameof(serial)));
+                            GumpType type = (GumpType)int.Parse(xml.GetAttribute("type"));
+                            int x = int.Parse(xml.GetAttribute("x"));
+                            int y = int.Parse(xml.GetAttribute("y"));
+                            uint serial = uint.Parse(xml.GetAttribute("serial"));
 
-                            Gump gump = null;
+                            int matrix_x = int.Parse(xml.GetAttribute("matrix_x"));
+                            int matrix_y = int.Parse(xml.GetAttribute("matrix_y"));
+
+                            AnchorableGump gump = null;
 
                             switch (type)
                             {
-                                case GumpType.Buff:
-                                    gump = new BuffGump();
+                                case GumpType.SpellButton:
+                                    gump = new UseSpellButtonGump();
 
                                     break;
 
-                                case GumpType.Container:
-                                    gump = new ContainerGump();
-
-                                    break;
-
-                                case GumpType.CounterBar:
-                                    gump = new CounterBarGump();
+                                case GumpType.SkillButton:
+                                    gump = new SkillButtonGump();
 
                                     break;
 
@@ -509,13 +695,8 @@ namespace ClassicUO.Configuration
 
                                     break;
 
-                                case GumpType.InfoBar:
-                                    gump = new InfoBarGump();
-
-                                    break;
-
-                                case GumpType.Journal:
-                                    gump = new JournalGump();
+                                case GumpType.AbilityButton:
+                                    gump = new UseAbilityButtonGump();
 
                                     break;
 
@@ -523,96 +704,28 @@ namespace ClassicUO.Configuration
                                     gump = new MacroButtonGump();
 
                                     break;
+                            }
 
-                                case GumpType.MiniMap:
-                                    gump = new MiniMapGump();
+                            if (gump != null)
+                            {
+                                gump.LocalSerial = serial;
+                                gump.Restore(xml);
+                                gump.X = x;
+                                gump.Y = y;
 
-                                    break;
-
-                                case GumpType.PaperDoll:
-                                    gump = new PaperDollGump();
-
-                                    break;
-
-                                case GumpType.SkillMenu:
-                                    if (StandardSkillsGump)
+                                if (!gump.IsDisposed)
+                                {
+                                    if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
                                     {
-                                        gump = new StandardSkillsGump();
+                                        gumps.Add(gump);
+                                        UIManager.AnchorManager[gump] = ancoGroup;
+                                        ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
                                     }
                                     else
                                     {
-                                        gump = new SkillGumpAdvanced();
+                                        gump.Dispose();
                                     }
-
-                                    break;
-
-                                case GumpType.SpellBook:
-                                    gump = new SpellbookGump();
-
-                                    break;
-
-                                case GumpType.StatusGump:
-                                    gump = StatusGumpBase.AddStatusGump(0, 0);
-
-                                    break;
-
-                                //case GumpType.TipNotice:
-                                //    gump = new TipNoticeGump();
-                                //    break;
-                                case GumpType.AbilityButton:
-                                    gump = new UseAbilityButtonGump();
-
-                                    break;
-
-                                case GumpType.SpellButton:
-                                    gump = new UseSpellButtonGump();
-
-                                    break;
-
-                                case GumpType.SkillButton:
-                                    gump = new SkillButtonGump();
-
-                                    break;
-
-                                case GumpType.RacialButton:
-                                    gump = new RacialAbilityButton();
-
-                                    break;
-
-                                case GumpType.WorldMap:
-                                    gump = new WorldMapGump();
-
-                                    break;
-
-                                case GumpType.Debug:
-                                    gump = new DebugGump(100, 100);
-
-                                    break;
-
-                                case GumpType.NetStats:
-                                    gump = new NetworkStatsGump(100, 100);
-
-                                    break;
-                            }
-
-                            if (gump == null)
-                            {
-                                continue;
-                            }
-
-                            gump.LocalSerial = serial;
-                            gump.Restore(xml);
-                            gump.X = x;
-                            gump.Y = y;
-
-                            if (gump.LocalSerial != 0)
-                            {
-                                UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
-                            }
-
-                            if (!gump.IsDisposed)
-                            {
-                                gumps.Add(gump);
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -620,96 +733,12 @@ namespace ClassicUO.Configuration
                             Log.Error(ex.ToString());
                         }
                     }
-
-                    foreach (XmlElement group in root.GetElementsByTagName("anchored_group_gump"))
-                    {
-                        int matrix_width = int.Parse(group.GetAttribute("matrix_w"));
-                        int matrix_height = int.Parse(group.GetAttribute("matrix_h"));
-
-                        AnchorManager.AnchorGroup ancoGroup = new AnchorManager.AnchorGroup();
-                        ancoGroup.ResizeMatrix(matrix_width, matrix_height, 0, 0);
-
-                        foreach (XmlElement xml in group.GetElementsByTagName("gump"))
-                        {
-                            try
-                            {
-                                GumpType type = (GumpType) int.Parse(xml.GetAttribute("type"));
-                                int x = int.Parse(xml.GetAttribute("x"));
-                                int y = int.Parse(xml.GetAttribute("y"));
-                                uint serial = uint.Parse(xml.GetAttribute("serial"));
-
-                                int matrix_x = int.Parse(xml.GetAttribute("matrix_x"));
-                                int matrix_y = int.Parse(xml.GetAttribute("matrix_y"));
-
-                                AnchorableGump gump = null;
-
-                                switch (type)
-                                {
-                                    case GumpType.SpellButton:
-                                        gump = new UseSpellButtonGump();
-
-                                        break;
-
-                                    case GumpType.SkillButton:
-                                        gump = new SkillButtonGump();
-
-                                        break;
-
-                                    case GumpType.HealthBar:
-                                        if (CustomBarsToggled)
-                                        {
-                                            gump = new HealthBarGumpCustom();
-                                        }
-                                        else
-                                        {
-                                            gump = new HealthBarGump();
-                                        }
-
-                                        break;
-
-                                    case GumpType.AbilityButton:
-                                        gump = new UseAbilityButtonGump();
-
-                                        break;
-
-                                    case GumpType.MacroButton:
-                                        gump = new MacroButtonGump();
-
-                                        break;
-                                }
-
-                                if (gump != null)
-                                {
-                                    gump.LocalSerial = serial;
-                                    gump.Restore(xml);
-                                    gump.X = x;
-                                    gump.Y = y;
-
-                                    if (!gump.IsDisposed)
-                                    {
-                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
-                                        {
-                                            gumps.Add(gump);
-                                            UIManager.AnchorManager[gump] = ancoGroup;
-                                            ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
-                                        }
-                                        else
-                                        {
-                                            gump.Dispose();
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error(ex.ToString());
-                            }
-                        }
-                    }
                 }
             }
 
             return gumps;
+
         }
+
     }
 }
