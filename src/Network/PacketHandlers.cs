@@ -5551,7 +5551,7 @@ namespace ClassicUO.Network
 
                 case 0xFE:
                     Log.Info("Razor ACK sent");
-                    //NetClient.Socket.Send(new PRazorAnswer());
+                    NetClient.Socket.Send(new PRazorAnswer());
 
                     break;
             }
