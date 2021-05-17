@@ -1720,7 +1720,8 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             World.WMapManager.RequestServerPartyGuildInfo(true);
                         }
-                        else if (mob != null && mob.Distance <= World.ClientViewRange)
+
+                        if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
                             WMapEntity wme = World.WMapManager.GetEntity(mob);
 
