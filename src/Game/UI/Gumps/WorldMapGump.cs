@@ -464,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Load();
             }
 
-            World.WMapManager.RequestServerPartyGuildInfo();
+            //World.WMapManager.RequestServerPartyGuildInfo();
         }
 
         #endregion
@@ -1716,7 +1716,11 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Mobile mob = World.Mobiles.Get(partyMember.Serial);
 
-                        if (mob != null && mob.Distance <= World.ClientViewRange)
+                        if(partyMember.Serial != null && mob == null)
+                        {
+                            World.WMapManager.RequestServerPartyGuildInfo(true);
+                        }
+                        else if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
                             WMapEntity wme = World.WMapManager.GetEntity(mob);
 
@@ -1724,7 +1728,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (string.IsNullOrEmpty(wme.Name) && !string.IsNullOrEmpty(partyMember.Name))
                                 {
-                                    wme.Name = partyMember.Name;
+                                wme.Name = partyMember.Name;
                                 }
                             }
 
@@ -1745,6 +1749,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
+
                             WMapEntity wme = World.WMapManager.GetEntity(partyMember.Serial);
 
                             if (wme != null && !wme.IsGuild)

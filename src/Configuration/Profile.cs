@@ -469,12 +469,13 @@ namespace ClassicUO.Configuration
                 if(monitor.Screen.Height >= 1080)
                 {
                     resName = "ClassicUO.gumps4k.xml";
+                    
                 }
                 else
                 {
                     resName = "ClassicUO.gumpsLowRes.xml";
                 }
-
+                Console.WriteLine($"Nuovi Gump, aperto il file {resName}");
 
                 string[] resources = assembly.GetManifestResourceNames();
 
