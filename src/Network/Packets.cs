@@ -1056,7 +1056,6 @@ namespace ClassicUO.Network
     {
         public PQueryGuildPosition() : base(0xF0)
         {
-            WriteByte(0x01);
             WriteBool(true);
         }
     }
