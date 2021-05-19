@@ -66,11 +66,6 @@ namespace ClassicUO.Configuration
 
             ScreenUtils monitor = new ScreenUtils();
 
-            if(monitor.Screen.Height <= 1080) // Se hai un monitor con una risoluzione minore, cambialo.
-            {
-                CurrentProfile.GameWindowSize = new Point(600, 480);
-            }
-
             ValidateFields(CurrentProfile);
         }
 
