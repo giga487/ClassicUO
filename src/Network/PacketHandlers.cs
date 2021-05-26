@@ -5544,7 +5544,7 @@ namespace ClassicUO.Network
                 case 0x03: // runebook contents
                     break;
 
-                case 0x04: // guardline data
+                case 0x04: // guardline daECCOC
                     break;
 
                 case 0xF0: break;

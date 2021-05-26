@@ -64,7 +64,6 @@ namespace ClassicUO.Game.Managers
             ItemId = 3,
             AnimalTaming = 35,
             ArmsLore = 4,
-            Begging = 6,
             Cartoography = 12,
             DetectHidden = 14,
             Discordance = 15,
@@ -89,7 +88,7 @@ namespace ClassicUO.Game.Managers
 
         private readonly byte[] _skillTable =
         {
-            1, 2, 35, 4, 6, 12,
+            1, 2, 35, 4, 12,
             14, 15, 16, 19, 21, 56 /*imbuing*/,
             23, 3, 46, 5, 9, 30, 22,
             48, 32, 33, 47, 36, 38
@@ -2088,7 +2087,6 @@ namespace ClassicUO.Game.Managers
         AnimalLore,
         AnimalTaming,
         ArmsLore,
-        Begging,
         Cartography,
         DetectingHidden,
         Discordance,
