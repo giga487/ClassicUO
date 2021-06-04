@@ -1002,6 +1002,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region Loading
 
+        private void WorldMap()
+        {
+
+        }
+
+
         private unsafe Task Load()
         {
             _mapIndex = World.MapIndex;
@@ -1038,6 +1044,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 for (by = 0; by < fixedHeight; ++by)
                                 {
+                                    while( World.Map == null)
+                                    {
+                                        Task.Delay(50);
+                                    }
                                     ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                                     if (indexMap.MapAddress == 0)
