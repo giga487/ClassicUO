@@ -48,7 +48,7 @@ namespace ClassicUO.IO
     {
         public static string GetUOFilePath(string file)
         {
-            if (UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
+            if(UOFilesOverrideMap.Instance.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
             {
                 return uoFilePath;
             }

@@ -169,7 +169,10 @@ namespace ClassicUO
 
             uint flags = 0;
 
-            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+            var directoryExist = Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory);
+            var fileTileDataExist = File.Exists(UOFileManager.GetUOFilePath("tiledata.mul"));
+
+            if (!directoryExist  || !fileTileDataExist)
             {
                 flags |= INVALID_UO_DIRECTORY;
             }
