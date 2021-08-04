@@ -147,6 +147,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Checkbox _showHouseContent;
         private Checkbox _showInfoBar;
+        private Checkbox _ignoreAllianceMessages;
+        private Checkbox _ignoreGuildMessages;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -161,6 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
         // video
         private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private Checkbox _use_smooth_boat_movement;
+        private HSliderBar _terrainShadowLevel;
 
         private Checkbox _use_tooltip;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
@@ -1806,6 +1809,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             section5.PopIndent();
 
+            section5.Add(AddLabel(null, ResGumps.TerrainShadowsLevel, startX, startY));
+            section5.AddRight(_terrainShadowLevel = AddHSlider(null, Constants.MIN_TERRAIN_SHADOWS_LEVEL, Constants.MAX_TERRAIN_SHADOWS_LEVEL, _currentProfile.TerrainShadowsLevel, startX, startY, 200));
+
 
             SettingsSection section6 = AddSettingsSection(box, "Filters");
             section6.Y = section5.Bounds.Bottom + 40;
@@ -2404,7 +2410,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _hideChatGradient.Height + 2;
 
-            startY += 20;
+            _ignoreGuildMessages = AddCheckBox
+            (
+                rightArea,
+                ResGumps.IgnoreGuildMessages,
+                _currentProfile.IgnoreGuildMessages,
+                startX,
+                startY
+            );
+
+            startY += _ignoreGuildMessages.Height + 2;
+
+            _ignoreAllianceMessages = AddCheckBox
+            (
+                rightArea,
+                ResGumps.IgnoreAllianceMessages,
+                _currentProfile.IgnoreAllianceMessages,
+                startX,
+                startY
+            );
+
+            startY += 35;
 
             _randomizeColorsButton = new NiceButton
             (
@@ -3465,6 +3491,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _darkNights.IsChecked = false;
                     _enableShadows.IsChecked = true;
                     _enableShadowsStatics.IsChecked = true;
+                    _terrainShadowLevel.Value = 15;
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _partyAura.IsChecked = true;
@@ -3509,6 +3536,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _saveJournalCheckBox.IsChecked = false;
                     _hideChatGradient.IsChecked = false;
+                    _ignoreGuildMessages.IsChecked = false;
+                    _ignoreAllianceMessages.IsChecked = false;
 
                     break;
 
@@ -3691,7 +3720,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.ShowHouseContent != _showHouseContent.IsChecked)
             {
                 _currentProfile.ShowHouseContent = _showHouseContent.IsChecked;
-                NetClient.Socket.Send(new PShowPublicHouseContent(_currentProfile.ShowHouseContent));
+                NetClient.Socket.Send_ShowPublicHouseContent(_currentProfile.ShowHouseContent);
             }
 
 
@@ -3862,6 +3891,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseDarkNights = _darkNights.IsChecked;
             _currentProfile.ShadowsEnabled = _enableShadows.IsChecked;
             _currentProfile.ShadowsStatics = _enableShadowsStatics.IsChecked;
+            _currentProfile.TerrainShadowsLevel = _terrainShadowLevel.Value;
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
             _currentProfile.FilterType = _filterType.SelectedIndex;
 
@@ -3871,6 +3901,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.PartyAura = _partyAura.IsChecked;
             _currentProfile.PartyAuraHue = _partyAuraColorPickerBox.Hue;
             _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
+            _currentProfile.IgnoreGuildMessages = _ignoreGuildMessages.IsChecked;
+            _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;

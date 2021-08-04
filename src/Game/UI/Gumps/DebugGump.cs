@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
@@ -40,45 +41,23 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Managers;
-using ClassicUO.Network;
-using System.Collections.Generic;
-using System.Linq;
-
-
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        /*
         private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
-        */
-        /* UO Mars Debug, Giga487 */
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2})\n";
-        private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
-        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- MousePosAbs: {2}\n";
-        private const string DEBUG_STRING_3 = "- Selected: {0}"; 
-        private const string DEBUG_STRING_PING = "- Ping: {0} ms\n";
-        private const string DEBUG_STRING_PING_SMALL = "\nPing: {0} ms\n";
-        /* */
+
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
-        private const string DEBUG_STRING_ZOOM = "- Zoom: {0}\n";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
         private static Point _last_position = new Point(-1, -1);
 
-        private readonly StringBuilder _sb = new StringBuilder();
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
-
-        static private List<float> alphaPossibleValue = new List<float>(){ 0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f,0.7f, 0.8f, 0.9f, 1.0f };
-        int size_alphaPossibleValue = alphaPossibleValue.Count;
-        private float alpha = alphaPossibleValue.ElementAt(0);
-
-        private uint _ping;
+        private string _cacheText = string.Empty;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -95,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _alphaBlendControl = new AlphaBlendControl(alpha)
+                _alphaBlendControl = new AlphaBlendControl(.3f)
                 {
                     Width = Width, Height = Height
                 }
@@ -121,40 +100,38 @@ namespace ClassicUO.Game.UI.Gumps
 
             return false;
         }
+
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
-            _ping = NetClient.Socket.Statistics.Ping;
 
             if (Time.Ticks > _timeToUpdate)
             {
                 _timeToUpdate = Time.Ticks + 100;
 
-                _sb.Clear();
                 GameScene scene = Client.Game.GetScene<GameScene>();
-
+                Span<char> span = stackalloc char[256];
+                ValueStringBuilder sb = new ValueStringBuilder(span);
+           
                 if (IsMinimized && scene != null)
                 {
+                    sb.Append
+                    (string.Format(
+                         DEBUG_STRING_0,
+                         CUOEnviroment.CurrentRefreshRate,
+                         0,
+                         0,
+                         !World.InGame ? 1f : scene.Camera.Zoom,
+                         scene.RenderedObjectsCount
+                         )
+                     );
 
-                    _sb.AppendFormat
-                    (
-                        DEBUG_STRING_0,
-                        CUOEnviroment.CurrentRefreshRate,
-                        0,
-                        0,
-                        !World.InGame ? 1f : scene.Camera.Zoom,
-                        scene.RenderedObjectsCount
-                    );
-
-                    _sb.AppendFormat(DEBUG_STRING_PING, _ping);
-                    _sb.AppendFormat(DEBUG_STRING_ZOOM, !World.InGame ? 1f : scene.Camera.Zoom);
-                    //_sb.AppendLine($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}");
+                    sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                    //_sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
-                    /* giga487 */
-                    _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
-                    //_sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
+                    sb.Append(string.Format(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));
+
+                    sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
 
                     if (CUOEnviroment.Profiler)
                     {
@@ -171,13 +148,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                         double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
-                        _sb.AppendLine("- Profiling");
+                        sb.Append("- Profiling\n");
 
-                        _sb.AppendLine
+                        sb.Append
                         (
                             string.Format
                             (
-                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}",
+                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}\n",
                                 100d * (timeDraw / timeTotal),
                                 100d * (timeUpdate / timeTotal),
                                 100d * (timeFixedUpdate / timeTotal),
@@ -187,25 +164,23 @@ namespace ClassicUO.Game.UI.Gumps
                         );
                     }
                 }
-                /*
                 else if (scene != null && scene.Camera.Zoom != 1f)
                 {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom);
+                    sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
                 }
-                */
                 else
                 {
-                    _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
-                    _sb.AppendFormat(DEBUG_STRING_PING_SMALL, NetClient.Socket.Statistics.Ping);  /* giga487 */
-                    //_sb.AppendFormat(DEBUG_STRING_ZOOM, !World.InGame ? 1f : scene.Camera.Zoom); /* giga487 */
+                    sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
                 }
 
+                _cacheText = sb.ToString();
 
-                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
+                sb.Dispose();
+
+                Vector2 size = Fonts.Bold.MeasureString(_cacheText);
 
                 _alphaBlendControl.Width = Width = (int) (size.X + 20);
-                //_alphaBlendControl.Height = Height = (int) (size.Y + 20);
-                _alphaBlendControl.Height = Height = (int)(size.Y);
+                _alphaBlendControl.Height = Height = (int) (size.Y + 20);
 
                 WantUpdateSize = true;
             }
@@ -223,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawString
             (
                 Fonts.Bold,
-                _sb.ToString(),
+                _cacheText,
                 x + 10,
                 y + 10,
                 ref HueVector
@@ -250,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case TextObject overhead: return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
-                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
+                    case Land land: return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags} stretched: {land.IsStretched}  avgZ: {land.AverageZ} minZ: {land.MinZ}";
                 }
             }
 
@@ -286,38 +261,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _last_position.X = ScreenCoordinateX;
             _last_position.Y = ScreenCoordinateY;
-        }
-
-        public override void OnButtonClick(int buttonID)
-        {
-            alpha += 0.1f;
-            base.OnButtonClick(buttonID);
-        }
-
-        /* giga487, vado a variare l'intensità dell'ombra del gump PING/FPS */
-        protected override void OnMouseWheel(MouseEventType delta)
-        {
-            int index = alphaPossibleValue.IndexOf(alpha);
-
-            bool last = index == size_alphaPossibleValue - 1;
-            bool first = index == 0;
-
-            switch (delta)
-            {
-                case MouseEventType.WheelScrollUp:
-                    alpha = last?alphaPossibleValue.ElementAt(index):alphaPossibleValue.ElementAt(index + 1);
-
-                    break;
-
-                case MouseEventType.WheelScrollDown:
-                    alpha = first ?alphaPossibleValue.ElementAt(index):alphaPossibleValue.ElementAt(index - 1);
-
-                    break;
-            }
-
-            _alphaBlendControl.SetAlphaBlendControl(alpha);
-
-
         }
     }
 }

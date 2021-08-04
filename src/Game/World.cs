@@ -32,6 +32,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.IO.Audio;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -70,9 +71,9 @@ namespace ClassicUO.Game
         public static GuildManager Guild  { get; } = new GuildManager();
         public static HouseManager HouseManager { get; } = new HouseManager();
 
-        public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
+        public static Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
-        public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
+        public static Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
 
         public static Map.Map Map { get; private set; }
 
@@ -185,9 +186,10 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            if (!Client.Game.Scene.Audio.IsMusicPlaying())
+            UOMusic currentMusic = Client.Game.Scene.Audio.GetCurrentMusic();
+            if (currentMusic == null || currentMusic.Index == Client.Game.Scene.Audio.LoginMusicIndex)
             {
-                Client.Game.Scene.Audio.PlayMusic(music, true);
+                Client.Game.Scene.Audio.PlayMusic(music, false);
             }
         }
 
@@ -248,7 +250,7 @@ namespace ClassicUO.Game
                     _timeToDelete = Time.Ticks + 50;
                 }
 
-                foreach (Mobile mob in Mobiles)
+                foreach (Mobile mob in Mobiles.Values)
                 {
                     mob.Update(totalTime, frameTime);
 
@@ -302,7 +304,7 @@ namespace ClassicUO.Game
                     _toRemove.Clear();
                 }
 
-                foreach (Item item in Items)
+                foreach (Item item in Items.Values)
                 {
                     item.Update(totalTime, frameTime);
 
@@ -578,7 +580,7 @@ namespace ClassicUO.Game
 
             if (scanType == ScanTypeObject.Objects)
             {
-                foreach (Item item in Items)
+                foreach (Item item in Items.Values)
                 {
                     if (item.IsMulti || item.IsDestroyed || !item.OnGround)
                     {
@@ -594,7 +596,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                foreach (Mobile mobile in Mobiles)
+                foreach (Mobile mobile in Mobiles.Values)
                 {
                     if (mobile.IsDestroyed || mobile == Player)
                     {
@@ -643,7 +645,7 @@ namespace ClassicUO.Game
 
             if (scanType == ScanTypeObject.Objects)
             {
-                var items = reverse ? Items.Reverse() : Items;
+                var items = reverse ? Items.Values.Reverse() : Items.Values;
                 foreach (Item item in items)
                 {
                     if (item.IsMulti || item.IsDestroyed || !item.OnGround)
@@ -667,7 +669,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                IEnumerable<Mobile> mobiles = reverse ? Mobiles.Reverse() : Mobiles;
+                IEnumerable<Mobile> mobiles = reverse ? Mobiles.Values.Reverse() : Mobiles.Values;
                 foreach (Mobile mobile in mobiles)
                 {
                     if (mobile.IsDestroyed || mobile == Player)
@@ -727,12 +729,12 @@ namespace ClassicUO.Game
 
         public static void Clear()
         {
-            foreach (Mobile mobile in Mobiles)
+            foreach (Mobile mobile in Mobiles.Values)
             {
                 RemoveMobile(mobile);
             }
 
-            foreach (Item item in Items)
+            foreach (Item item in Items.Values)
             {
                 RemoveItem(item);
             }
@@ -779,7 +781,7 @@ namespace ClassicUO.Game
                 Player = null;
             }
 
-            foreach (Item item in Items)
+            foreach (Item item in Items.Values)
             {
                 if (noplayer && Player != null && !Player.IsDestroyed)
                 {
@@ -804,7 +806,7 @@ namespace ClassicUO.Game
 
             _toRemove.Clear();
 
-            foreach (Mobile mob in Mobiles)
+            foreach (Mobile mob in Mobiles.Values)
             {
                 if (noplayer && Player != null && !Player.IsDestroyed)
                 {
