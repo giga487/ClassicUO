@@ -56,12 +56,13 @@ namespace ClassicUO.Network
 
         private int _incompletePacketLength;
         private bool _isCompressionEnabled;
-        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
+        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer, _packetBuffer;
         private CircularBuffer _circularBuffer;
         private ConcurrentQueue<byte[]> _pluginRecvQueue = new ConcurrentQueue<byte[]>();
         private readonly bool _is_login_socket;
         private TcpClient _tcpClient;
         private NetworkStream _netStream;
+        private uint? _localIP;
 
 
         private NetClient(bool is_login_socket)
@@ -82,15 +83,44 @@ namespace ClassicUO.Network
 
         public ClientSocketStatus Status { get; private set; }
 
-        public uint LocalIP => (uint)((_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address?.Address ?? 0x100007f);
+        public uint LocalIP
+        {
+            get
+            {
+                if (!_localIP.HasValue)
+                {
+                    try
+                    {
+                        byte[] addressBytes = (_tcpClient.Client?.LocalEndPoint as IPEndPoint)?.Address.MapToIPv4().GetAddressBytes();
+
+                        if (addressBytes != null && addressBytes.Length != 0)
+                        {
+                            _localIP = (uint)(addressBytes[0] | (addressBytes[1] << 8) | (addressBytes[2] << 16) | (addressBytes[3] << 24));
+                        }
+
+                        if (!_localIP.HasValue || _localIP == 0)
+                        {
+                            _localIP = 0x100007f;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"error while retriving local endpoint address: \n{ex}");
+
+                        _localIP = 0x100007f;
+                    }
+                }
+
+                return _localIP.Value;
+            }
+        }
+
 
         public NetStatistics Statistics { get; }
 
 
         public event EventHandler Connected;
         public event EventHandler<SocketError> Disconnected;
-
-        public static event EventHandler<PacketWriter> PacketSent;
 
         private static readonly Task<bool> TaskCompletedFalse = new Task<bool>(() => false);
 
@@ -148,6 +178,7 @@ namespace ClassicUO.Network
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
+            _packetBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
             _pluginRecvQueue = new ConcurrentQueue<byte[]>();
             Statistics.Reset();
@@ -188,6 +219,8 @@ namespace ClassicUO.Network
             catch (SocketException e)
             {
                 Log.Error($"Socket error when connecting:\n{e}");
+                _logFile?.Write($"connection error: {e}");
+
                 Disconnect(e.SocketErrorCode);
 
                 return TaskCompletedFalse;
@@ -201,6 +234,8 @@ namespace ClassicUO.Network
 
         private void Disconnect(SocketError error)
         {
+            _logFile?.Write($"disconnection  -  socket_error: {error}");
+
             if (IsDisposed)
             {
                 return;
@@ -239,6 +274,7 @@ namespace ClassicUO.Network
             _tcpClient = null;
             _netStream = null;
             _circularBuffer = null;
+            _localIP = null;
 
             if (error != 0)
             {
@@ -253,26 +289,14 @@ namespace ClassicUO.Network
             _isCompressionEnabled = true;
         }
 
-        public void Send(PacketWriter p)
-        {
-            ref byte[] data = ref p.ToArray();
-            int length = p.Length;
-
-            if (Plugin.ProcessSendPacket(ref data, ref length))
-            {
-                PacketSent.Raise(p);
-                Send(data, length, false);
-            }
-        }
-
+        
         public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
         {
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(data, ref length))
             {
                 return;
             }
 
-            PacketSent.Raise(new PacketWriter(data, length));
             Send(data, length, skip_encryption);
         }
 
@@ -311,6 +335,8 @@ namespace ClassicUO.Network
                 catch (SocketException ex)
                 {
                     Log.Error("socket error when sending:\n" + ex);
+                    _logFile?.Write($"disconnection  -  error during writing to the socket buffer: {ex}");
+
                     Disconnect(ex.SocketErrorCode);
                 }
                 catch (Exception ex)
@@ -318,12 +344,19 @@ namespace ClassicUO.Network
                     if (ex.InnerException is SocketException socketEx)
                     {
                         Log.Error("socket error when sending:\n" + socketEx);
+
+                        _logFile?.Write($"disconnection  -  error during writing to the socket buffer [2]: {socketEx}");
                         Disconnect(socketEx.SocketErrorCode);
                     }
                     else
                     {
                         Log.Error("fatal error when receiving:\n" + ex);
+
+                        _logFile?.Write($"disconnection  -  error during writing to the socket buffer [3]: {ex}");
+
                         Disconnect();
+
+                        throw;
                     }
                 }
             }
@@ -375,7 +408,7 @@ namespace ClassicUO.Network
                     if (packetlength > 0)
                     {
                         // Patch to maintain a retrocompatibiliy with older cuoapi
-                        byte[] data = new byte[packetlength]; // _packetBuffer;
+                        byte[] data = _packetBuffer;
 
                         _circularBuffer.Dequeue(data, 0, packetlength);
 
@@ -384,7 +417,7 @@ namespace ClassicUO.Network
                             LogPacket(data, packetlength, false);
                         }
 
-                        if (Plugin.ProcessRecvPacket(ref data, ref packetlength))
+                        if (Plugin.ProcessRecvPacket(data, ref packetlength))
                         {
                             PacketHandlers.Handlers.AnalyzePacket(data, offset, packetlength);
 
@@ -480,12 +513,18 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Warn("Server sent 0 bytes. Closing connection");
+
+                    _logFile?.Write($"disconnection  -  received {received} bytes from server");
+
                     Disconnect(SocketError.SocketError);
                 }
             }
             catch (SocketException socketException)
             {
                 Log.Error("socket error when receiving:\n" + socketException);
+
+                _logFile?.Write($"disconnection  -  error while reading from socket: {socketException}");
+
                 Disconnect(socketException.SocketErrorCode);
             }
             catch (Exception ex)
@@ -493,12 +532,18 @@ namespace ClassicUO.Network
                 if (ex.InnerException is SocketException socketEx)
                 {
                     Log.Error("socket error when receiving:\n" + socketEx);
+                    _logFile?.Write($"disconnection  -  error while reading from socket [1]: {socketEx}");
+
                     Disconnect(socketEx.SocketErrorCode);
                 }
                 else
                 {
                     Log.Error("fatal error when receiving:\n" + ex);
+                    _logFile?.Write($"disconnection  -  error while reading from socket [2]: {ex}");
+
                     Disconnect();
+
+                    throw;
                 }
             }
         }
@@ -605,113 +650,77 @@ namespace ClassicUO.Network
             if (_logFile == null)
                 _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
-            int pos = 0;
-
-            StringBuilder output = new StringBuilder();
-
-            output.AppendFormat("{0}   -   ID {1:X2}   Length: {2}\n", (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], buffer.Length);
-
-            if (buffer[0] == 0x80 || buffer[0] == 0x91)
+            Span<char> span = stackalloc char[256];
+            ValueStringBuilder output = new ValueStringBuilder(span);
             {
-                output.AppendLine("[ACCOUNT CREDENTIALS HIDDEN]");
-            }
-            else
-            {
-                output.AppendLine("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F");
-                output.AppendLine("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --");
+                int off = sizeof(ulong) + 2;
 
-                int byteIndex = 0;
+                output.Append(' ', off);
+                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), buffer[0], length));
 
-                int whole = length >> 4;
-                int rem = length & 0xF;
-
-                for (int i = 0; i < whole; ++i, byteIndex += 16)
+                if (buffer[0] == 0x80 || buffer[0] == 0x91)
                 {
-                    StringBuilder bytes = new StringBuilder(49);
-                    StringBuilder chars = new StringBuilder(16);
-
-                    for (int j = 0; j < 16; ++j)
-                    {
-                        int c = buffer[pos++];
-
-                        bytes.Append(c.ToString("X2"));
-
-                        if (j != 7)
-                        {
-                            bytes.Append(' ');
-                        }
-                        else
-                        {
-                            bytes.Append("  ");
-                        }
-
-                        if (c >= 0x20 && c < 0x80)
-                        {
-                            chars.Append((char) c);
-                        }
-                        else
-                        {
-                            chars.Append('.');
-                        }
-                    }
-
-                    output.Append(byteIndex.ToString("X4"));
-                    output.Append("   ");
-                    output.Append(bytes);
-                    output.Append("  ");
-                    output.AppendLine(chars.ToString());
+                    output.Append(' ', off);
+                    output.Append("[ACCOUNT CREDENTIALS HIDDEN]\n");
                 }
-
-                if (rem != 0)
+                else
                 {
-                    StringBuilder bytes = new StringBuilder(49);
-                    StringBuilder chars = new StringBuilder(rem);
+                    output.Append(' ', off);
+                    output.Append("0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 
-                    for (int j = 0; j < 16; ++j)
+                    output.Append(' ', off);
+                    output.Append("-- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
+
+                    ulong address = 0;
+
+                    for (int i = 0; i < length; i += 16, address += 16)
                     {
-                        if (j < rem)
+                        output.Append($"{address:X8}");
+
+                        for (int j = 0; j < 16; ++j)
                         {
-                            int c = buffer[pos++];
-
-                            bytes.Append(c.ToString("X2"));
-
-                            if (j != 7)
+                            if ((j % 8) == 0)
                             {
-                                bytes.Append(' ');
+                                output.Append(" ");
+                            }
+
+                            if (i + j < length)
+                            {
+                                output.Append($" {buffer[i + j]:X2}");
                             }
                             else
                             {
-                                bytes.Append("  ");
+                                output.Append("   ");
                             }
+                        }
+
+                        output.Append("  ");
+
+                        for (int j = 0; j < 16 && i + j < length; ++j)
+                        {
+                            byte c = buffer[i + j];
 
                             if (c >= 0x20 && c < 0x80)
                             {
-                                chars.Append((char) c);
+                                output.Append((char)c);
                             }
                             else
                             {
-                                chars.Append('.');
+                                output.Append('.');
                             }
                         }
-                        else
-                        {
-                            bytes.Append("   ");
-                        }
+
+                        output.Append('\n');
                     }
-
-                    output.Append(byteIndex.ToString("X4"));
-                    output.Append("   ");
-                    output.Append(bytes);
-                    output.Append("  ");
-                    output.AppendLine(chars.ToString());
                 }
+
+                output.Append('\n');
+                output.Append('\n');
+
+                _logFile.Write(output.ToString());
+
+                output.Dispose();
             }
-
-
-            output.AppendLine();
-            output.AppendLine();
-
-            _logFile.Write(output.ToString());
         }
     }
 }
