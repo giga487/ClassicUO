@@ -48,13 +48,13 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2})\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
-        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n";// InGamePos: {2}\n";
+        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}";// InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
         private const string DEBUG_STRING_PING = "- Ping: {0} ms\n"; //giga487
-        private const string DEBUG_STRING_PING_SMALL = "- Ping: {0} ms\n";
+        private const string DEBUG_STRING_PING_SMALL = "- Ping: {0} ms";
 
         private const string DEBUG_STRING_SMALL = "- FPS: {0}\nZoom: {1}";
         private const string DEBUG_STRING_ZOOM = "- Zoom: {0}\n";
@@ -64,7 +64,11 @@ namespace ClassicUO.Game.UI.Gumps
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
         private string _cacheText = string.Empty;
-        private uint _ping;
+        private uint _ping = 0;
+
+        static private List<float> alphaPossibleValue = new List<float>() { 0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f };
+        int size_alphaPossibleValue = alphaPossibleValue.Count;
+        private float alpha = alphaPossibleValue[0];
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -111,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
-            //_ping = NetClient.Socket.Statistics.Ping;
+            _ping = NetClient.Socket.Statistics.Ping;
 
             if (Time.Ticks > _timeToUpdate)
             {
@@ -275,6 +279,32 @@ namespace ClassicUO.Game.UI.Gumps
 
             _last_position.X = ScreenCoordinateX;
             _last_position.Y = ScreenCoordinateY;
+        }
+
+        /* giga487, vado a variare l'intensità dell'ombra del gump PING/FPS */
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            int index = alphaPossibleValue.IndexOf(alpha);
+
+            bool last = index == size_alphaPossibleValue - 1;
+            bool first = index == 0;
+
+            switch (delta)
+            {
+                case MouseEventType.WheelScrollUp:
+                    alpha = last ? alphaPossibleValue[index] : alphaPossibleValue[index + 1];
+
+                    break;
+
+                case MouseEventType.WheelScrollDown:
+                    alpha = first ? alphaPossibleValue[index] : alphaPossibleValue[index - 1];
+
+                    break;
+            }
+
+            _alphaBlendControl.SetAlphaBlendControl(alpha);
+
+
         }
     }
 }
