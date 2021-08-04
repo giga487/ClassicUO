@@ -41,8 +41,8 @@ namespace ClassicUO.Game.UoMars
             try
             {
                 // full path will be: \UoMarsClient/Music/Digital/UoMars/file.mp3
-                UOMusic music = new UOMusic(0, "UoMars/" + file, false);
-                music.Play(volume);
+                //UOMusic music = new UOMusic(0, "UoMars/" + file, false);
+                //music.Play(volume);
             }
             catch (Exception e)
             {}

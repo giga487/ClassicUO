@@ -68,7 +68,6 @@ namespace ClassicUO.Game
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
         public static PartyManager Party { get; } = new PartyManager();
-        public static GuildManager Guild  { get; } = new GuildManager();
         public static HouseManager HouseManager { get; } = new HouseManager();
 
         public static Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
