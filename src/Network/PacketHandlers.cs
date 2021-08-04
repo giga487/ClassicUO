@@ -5567,7 +5567,8 @@ namespace ClassicUO.Network
                             ushort x = p.ReadUInt16BE();
                             ushort y = p.ReadUInt16BE();
                             byte map = p.ReadUInt8();
-                            int hits = type == 1 ? 0 : p.ReadUInt8();
+                            string name = p.ReadUnicodeBE();
+                            int hits = p.ReadUInt8();
 
                             World.WMapManager.AddOrUpdate
                             (
