@@ -32,7 +32,6 @@
 
 using System;
 using System.Collections.Generic;
-using ClassicUO.Data;
 using ClassicUO.Configuration;
 using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
@@ -47,8 +46,6 @@ namespace ClassicUO.Game.Managers
         private readonly LinkedList<UOSound> _currentSounds = new LinkedList<UOSound>();
         private readonly UOMusic[] _currentMusic = { null, null };
         private readonly int[] _currentMusicIndices = { 0, 0 };
-        public int LoginMusicIndex { get; private set; }
-        public int DeathMusicIndex { get; } = 42;
 
         public void Initialize()
         {
@@ -61,8 +58,6 @@ namespace ClassicUO.Game.Managers
                 Log.Warn(ex.ToString());
                 _canReproduceAudio = false;
             }
-
-            LoginMusicIndex = Client.Version >= ClientVersion.CV_7000 ? 78 : Client.Version > ClientVersion.CV_308Z ? 0 : 8;
 
             Client.Game.Activated += OnWindowActivated;
             Client.Game.Deactivated += OnWindowDeactivated;
@@ -380,16 +375,16 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public UOMusic GetCurrentMusic()
+        public bool IsMusicPlaying()
         {
             for (int i = 0; i < 2; i++)
             {
                 if (_currentMusic[i] != null && _currentMusic[i].IsPlaying)
                 {
-                    return _currentMusic[i];
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
     }
 }

@@ -35,30 +35,70 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
-    static class DictExt
+    internal class EntityCollection<T> : IEnumerable<T> where T : Entity
     {
-        public static T Get<T>(this Dictionary<uint, T> dict, uint serial) where T : Entity
-        {
-            dict.TryGetValue(serial, out var v);
+        private readonly Dictionary<uint, T> _entities = new Dictionary<uint, T>();
 
-            return v;
+        public int Count => _entities.Count;
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
-        public static bool Contains<T>(this Dictionary<uint, T> dict, uint serial) where T : Entity
+        public IEnumerator<T> GetEnumerator()
         {
-            return dict.ContainsKey(serial);
+            return _entities.Values.GetEnumerator();
         }
 
-        public static bool Add<T>(this Dictionary<uint, T> dict, T entity) where T : Entity
+
+        public bool Contains(uint serial)
         {
-            if (dict.ContainsKey(entity.Serial))
+            return _entities.ContainsKey(serial);
+        }
+
+        public T Get(uint serial)
+        {
+            _entities.TryGetValue(serial, out T entity);
+
+            return entity;
+        }
+
+        public bool Add(T entity)
+        {
+            if (_entities.ContainsKey(entity.Serial))
             {
                 return false;
             }
 
-            dict[entity.Serial] = entity;
+            _entities[entity.Serial] = entity;
 
             return true;
+        }
+
+        public void Remove(uint serial)
+        {
+            _entities.Remove(serial);
+        }
+
+        public void Replace(T entity, uint newSerial)
+        {
+            if (_entities.Remove(entity.Serial))
+            {
+                for (LinkedObject i = entity.Items; i != null; i = i.Next)
+                {
+                    Item it = (Item) i;
+                    it.Container = newSerial;
+                }
+
+                _entities[newSerial] = entity;
+                entity.Serial = newSerial;
+            }
+        }
+
+        public void Clear()
+        {
+            _entities.Clear();
         }
     }
 }

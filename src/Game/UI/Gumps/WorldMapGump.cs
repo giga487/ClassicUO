@@ -459,17 +459,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalTime, frameTime);
 
-            if (IsDisposed)
-            {
-                return;
-            }
-
             if (_mapIndex != World.MapIndex)
             {
                 Load();
             }
 
-            World.WMapManager.RequestServerPartyGuildInfo();
+            //World.WMapManager.RequestServerPartyGuildInfo();
         }
 
         #endregion
@@ -701,296 +696,289 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public static unsafe Texture2D CreateTextureFromICO_Cur(Stream stream)
             {
-                byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int) stream.Length);
+                byte[] buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, buffer.Length);
 
-                try
+                DataReader reader = new DataReader();
+                reader.SetData(buffer, stream.Length);
+
+                bool was_error;
+                long fp_offset;
+                int bmp_pitch;
+                int i, pad;
+                SDL.SDL_Surface* surface;
+                uint r_mask, g_mask, b_mask;
+                byte* bits;
+                int expand_bmp;
+                int max_col = 0;
+                uint ico_of_s = 0;
+                uint* palette = stackalloc uint[256];
+
+                ushort bf_reserved, bf_type, bf_count;
+                uint bi_size, bi_width, bi_height;
+                ushort bi_planes, bi_bit_count;
+
+                uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
+
+                bf_reserved = reader.ReadUShort();
+                bf_type = reader.ReadUShort();
+                bf_count = reader.ReadUShort();
+
+                for (i = 0; i < bf_count; i++)
                 {
-                    stream.Read(buffer, 0, buffer.Length);
+                    int b_width = reader.ReadByte();
+                    int b_height = reader.ReadByte();
+                    int b_color_count = reader.ReadByte();
+                    byte b_reserver = reader.ReadByte();
+                    ushort w_planes = reader.ReadUShort();
+                    ushort w_bit_count = reader.ReadUShort();
+                    uint dw_bytes_in_res = reader.ReadUInt();
+                    uint dw_image_offse = reader.ReadUInt();
 
-                    StackDataReader reader = new StackDataReader(buffer.AsSpan(0, (int)stream.Length));
-
-                    bool was_error;
-                    long fp_offset;
-                    int bmp_pitch;
-                    int i, pad;
-                    SDL.SDL_Surface* surface;
-                    uint r_mask, g_mask, b_mask;
-                    byte* bits;
-                    int expand_bmp;
-                    int max_col = 0;
-                    uint ico_of_s = 0;
-                    uint* palette = stackalloc uint[256];
-
-                    ushort bf_reserved, bf_type, bf_count;
-                    uint bi_size, bi_width, bi_height;
-                    ushort bi_planes, bi_bit_count;
-
-                    uint bi_compression, bi_size_image, bi_x_perls_per_meter, bi_y_perls_per_meter, bi_clr_used, bi_clr_important;
-
-                    bf_reserved = reader.ReadUInt16LE();
-                    bf_type = reader.ReadUInt16LE();
-                    bf_count = reader.ReadUInt16LE();
-
-                    for (i = 0; i < bf_count; i++)
+                    if (b_width == 0)
                     {
-                        int b_width = reader.ReadUInt8();
-                        int b_height = reader.ReadUInt8();
-                        int b_color_count = reader.ReadUInt8();
-                        byte b_reserver = reader.ReadUInt8();
-                        ushort w_planes = reader.ReadUInt16LE();
-                        ushort w_bit_count = reader.ReadUInt16LE();
-                        uint dw_bytes_in_res = reader.ReadUInt32LE();
-                        uint dw_image_offse = reader.ReadUInt32LE();
-
-                        if (b_width == 0)
-                        {
-                            b_width = 256;
-                        }
-
-                        if (b_height == 0)
-                        {
-                            b_height = 256;
-                        }
-
-                        if (b_color_count == 0)
-                        {
-                            b_color_count = 256;
-                        }
-
-                        if (b_color_count > max_col)
-                        {
-                            max_col = b_color_count;
-                            ico_of_s = dw_image_offse;
-                        }
+                        b_width = 256;
                     }
 
-                    reader.Seek(ico_of_s);
-
-                    bi_size = reader.ReadUInt32LE();
-
-                    if (bi_size == 40)
+                    if (b_height == 0)
                     {
-                        bi_width = reader.ReadUInt32LE();
-                        bi_height = reader.ReadUInt32LE();
-                        bi_planes = reader.ReadUInt16LE();
-                        bi_bit_count = reader.ReadUInt16LE();
-                        bi_compression = reader.ReadUInt32LE();
-                        bi_size_image = reader.ReadUInt32LE();
-                        bi_x_perls_per_meter = reader.ReadUInt32LE();
-                        bi_y_perls_per_meter = reader.ReadUInt32LE();
-                        bi_clr_used = reader.ReadUInt32LE();
-                        bi_clr_important = reader.ReadUInt32LE();
-                    }
-                    else
-                    {
-                        return null;
+                        b_height = 256;
                     }
 
-                    const int BI_RGB = 0;
-                    const int BI_RLE = 1;
-                    const int BI_RLE4 = 2;
-                    const int BI_BITFIELDS = 3;
-
-                    switch (bi_compression)
+                    if (b_color_count == 0)
                     {
-                        case BI_RGB:
-
-                            switch (bi_bit_count)
-                            {
-                                case 1:
-                                case 4:
-                                    expand_bmp = bi_bit_count;
-                                    bi_bit_count = 8;
-
-                                    break;
-
-                                case 8:
-                                    expand_bmp = 8;
-
-                                    break;
-
-                                case 32:
-                                    r_mask = 0x00FF0000;
-                                    g_mask = 0x0000FF00;
-                                    b_mask = 0x000000FF;
-                                    expand_bmp = 0;
-
-                                    break;
-
-                                default: return null;
-                            }
-
-                            break;
-
-                        default: return null;
+                        b_color_count = 256;
                     }
 
-
-                    bi_height >>= 1;
-
-                    surface = (SDL.SDL_Surface*)SDL.SDL_CreateRGBSurface
-                    (
-                        0,
-                        (int)bi_width,
-                        (int)bi_height,
-                        32,
-                        0x00FF0000,
-                        0x0000FF00,
-                        0x000000FF,
-                        0xFF000000
-                    );
-
-                    if (bi_bit_count <= 8)
+                    if (b_color_count > max_col)
                     {
-                        if (bi_clr_used == 0)
+                        max_col = b_color_count;
+                        ico_of_s = dw_image_offse;
+                    }
+                }
+
+                reader.Seek(ico_of_s);
+
+                bi_size = reader.ReadUInt();
+
+                if (bi_size == 40)
+                {
+                    bi_width = reader.ReadUInt();
+                    bi_height = reader.ReadUInt();
+                    bi_planes = reader.ReadUShort();
+                    bi_bit_count = reader.ReadUShort();
+                    bi_compression = reader.ReadUInt();
+                    bi_size_image = reader.ReadUInt();
+                    bi_x_perls_per_meter = reader.ReadUInt();
+                    bi_y_perls_per_meter = reader.ReadUInt();
+                    bi_clr_used = reader.ReadUInt();
+                    bi_clr_important = reader.ReadUInt();
+                }
+                else
+                {
+                    return null;
+                }
+
+                const int BI_RGB = 0;
+                const int BI_RLE = 1;
+                const int BI_RLE4 = 2;
+                const int BI_BITFIELDS = 3;
+
+                switch (bi_compression)
+                {
+                    case BI_RGB:
+
+                        switch (bi_bit_count)
                         {
-                            bi_clr_used = (uint)(1 << bi_bit_count);
+                            case 1:
+                            case 4:
+                                expand_bmp = bi_bit_count;
+                                bi_bit_count = 8;
+
+                                break;
+
+                            case 8:
+                                expand_bmp = 8;
+
+                                break;
+
+                            case 32:
+                                r_mask = 0x00FF0000;
+                                g_mask = 0x0000FF00;
+                                b_mask = 0x000000FF;
+                                expand_bmp = 0;
+
+                                break;
+
+                            default: return null;
                         }
 
-                        for (i = 0; i < bi_clr_used; i++)
-                        {
-                            palette[i] = reader.ReadUInt32LE();
-                        }
+                        break;
+
+                    default: return null;
+                }
+
+
+                bi_height >>= 1;
+
+                surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurface
+                (
+                    0,
+                    (int) bi_width,
+                    (int) bi_height,
+                    32,
+                    0x00FF0000,
+                    0x0000FF00,
+                    0x000000FF,
+                    0xFF000000
+                );
+
+                if (bi_bit_count <= 8)
+                {
+                    if (bi_clr_used == 0)
+                    {
+                        bi_clr_used = (uint) (1 << bi_bit_count);
                     }
 
-                    bits = (byte*)(surface->pixels + surface->h * surface->pitch);
+                    for (i = 0; i < bi_clr_used; i++)
+                    {
+                        palette[i] = reader.ReadUInt();
+                    }
+                }
+
+                bits = (byte*) (surface->pixels + surface->h * surface->pitch);
+
+                switch (expand_bmp)
+                {
+                    case 1:
+                        bmp_pitch = (int) (bi_width + 7) >> 3;
+                        pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                        break;
+
+                    case 4:
+                        bmp_pitch = (int) (bi_width + 1) >> 1;
+                        pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                        break;
+
+                    case 8:
+                        bmp_pitch = (int) bi_width;
+                        pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                        break;
+
+                    default:
+                        bmp_pitch = (int) bi_width * 4;
+                        pad = 0;
+
+                        break;
+                }
+
+
+                while (bits > (byte*) surface->pixels)
+                {
+                    bits -= surface->pitch;
 
                     switch (expand_bmp)
                     {
                         case 1:
-                            bmp_pitch = (int)(bi_width + 7) >> 3;
-                            pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
-
-                            break;
-
                         case 4:
-                            bmp_pitch = (int)(bi_width + 1) >> 1;
-                            pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
-
-                            break;
-
                         case 8:
-                            bmp_pitch = (int)bi_width;
-                            pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+                        {
+                            byte pixel = 0;
+                            int shift = 8 - expand_bmp;
+
+                            for (i = 0; i < surface->w; i++)
+                            {
+                                if (i % (8 / expand_bmp) == 0)
+                                {
+                                    pixel = reader.ReadByte();
+                                }
+
+                                *((uint*) bits + i) = palette[pixel >> shift];
+                                pixel <<= expand_bmp;
+                            }
+                        }
 
                             break;
 
                         default:
-                            bmp_pitch = (int)bi_width * 4;
-                            pad = 0;
+
+                            for (int k = 0; k < surface->pitch; k++)
+                            {
+                                bits[k] = reader.ReadByte();
+                            }
 
                             break;
                     }
 
-
-                    while (bits > (byte*)surface->pixels)
+                    if (pad != 0)
                     {
-                        bits -= surface->pitch;
-
-                        switch (expand_bmp)
+                        for (i = 0; i < pad; i++)
                         {
-                            case 1:
-                            case 4:
-                            case 8:
-                                {
-                                    byte pixel = 0;
-                                    int shift = 8 - expand_bmp;
-
-                                    for (i = 0; i < surface->w; i++)
-                                    {
-                                        if (i % (8 / expand_bmp) == 0)
-                                        {
-                                            pixel = reader.ReadUInt8();
-                                        }
-
-                                        *((uint*)bits + i) = palette[pixel >> shift];
-                                        pixel <<= expand_bmp;
-                                    }
-                                }
-
-                                break;
-
-                            default:
-
-                                for (int k = 0; k < surface->pitch; k++)
-                                {
-                                    bits[k] = reader.ReadUInt8();
-                                }
-
-                                break;
-                        }
-
-                        if (pad != 0)
-                        {
-                            for (i = 0; i < pad; i++)
-                            {
-                                reader.ReadUInt8();
-                            }
+                            reader.ReadByte();
                         }
                     }
-
-
-                    bits = (byte*)(surface->pixels + surface->h * surface->pitch);
-                    expand_bmp = 1;
-                    bmp_pitch = (int)(bi_width + 7) >> 3;
-                    pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
-
-                    while (bits > (byte*)surface->pixels)
-                    {
-                        byte pixel = 0;
-                        int shift = 8 - expand_bmp;
-
-                        bits -= surface->pitch;
-
-                        for (i = 0; i < surface->w; i++)
-                        {
-                            if (i % (8 / expand_bmp) == 0)
-                            {
-                                pixel = reader.ReadUInt8();
-                            }
-
-                            *((uint*)bits + i) |= pixel >> shift != 0 ? 0 : 0xFF000000;
-
-                            pixel <<= expand_bmp;
-                        }
-
-                        if (pad != 0)
-                        {
-                            for (i = 0; i < pad; i++)
-                            {
-                                reader.ReadUInt8();
-                            }
-                        }
-                    }
-
-                    surface = (SDL.SDL_Surface*)INTERNAL_convertSurfaceFormat((IntPtr)surface);
-
-                    int len = surface->w * surface->h * 4;
-                    byte* pixels = (byte*)surface->pixels;
-
-                    for (i = 0; i < len; i += 4, pixels += 4)
-                    {
-                        if (pixels[3] == 0)
-                        {
-                            pixels[0] = 0;
-                            pixels[1] = 0;
-                            pixels[2] = 0;
-                        }
-                    }
-
-                    Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
-                    texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
-
-                    SDL.SDL_FreeSurface((IntPtr)surface);
-
-                    reader.Release();
-
-                    return texture;
                 }
-                finally
+
+
+                bits = (byte*) (surface->pixels + surface->h * surface->pitch);
+                expand_bmp = 1;
+                bmp_pitch = (int) (bi_width + 7) >> 3;
+                pad = bmp_pitch % 4 != 0 ? 4 - bmp_pitch % 4 : 0;
+
+                while (bits > (byte*) surface->pixels)
                 {
-                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                    byte pixel = 0;
+                    int shift = 8 - expand_bmp;
+
+                    bits -= surface->pitch;
+
+                    for (i = 0; i < surface->w; i++)
+                    {
+                        if (i % (8 / expand_bmp) == 0)
+                        {
+                            pixel = reader.ReadByte();
+                        }
+
+                        *((uint*) bits + i) |= pixel >> shift != 0 ? 0 : 0xFF000000;
+
+                        pixel <<= expand_bmp;
+                    }
+
+                    if (pad != 0)
+                    {
+                        for (i = 0; i < pad; i++)
+                        {
+                            reader.ReadByte();
+                        }
+                    }
                 }
+
+                surface = (SDL.SDL_Surface*) INTERNAL_convertSurfaceFormat((IntPtr) surface);
+
+                int len = surface->w * surface->h * 4;
+                byte* pixels = (byte*) surface->pixels;
+
+                for (i = 0; i < len; i += 4, pixels += 4)
+                {
+                    if (pixels[3] == 0)
+                    {
+                        pixels[0] = 0;
+                        pixels[1] = 0;
+                        pixels[2] = 0;
+                    }
+                }
+
+                Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
+                texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
+
+                SDL.SDL_FreeSurface((IntPtr) surface);
+
+                reader.ReleaseData();
+
+                return texture;
             }
 
             private static unsafe IntPtr INTERNAL_convertSurfaceFormat(IntPtr surface)
@@ -1014,17 +1002,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         #region Loading
 
+        private void WorldMap()
+        {
+
+        }
+
+
         private unsafe Task Load()
         {
             _mapIndex = World.MapIndex;
             _mapTexture?.Dispose();
             _mapTexture = null;
 
-            if (_mapIndex < 0 || _mapIndex > Constants.MAPS_COUNT)
-            {
-                return Task.CompletedTask;
-            }
-            
             return Task.Run
             (
                 () =>
@@ -1033,152 +1022,165 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         try
                         {
-                            int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
-                            int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
-
                             const int OFFSET_PIX = 2;
                             const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
+                            int realWidth = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
+                            int realHeight = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
 
                             int fixedWidth = MapLoader.Instance.MapBlocksSize[World.MapIndex, 0];
                             int fixedHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
 
                             int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
-                           
-                            sbyte[] allZ = System.Buffers.ArrayPool<sbyte>.Shared.Rent(size);
-                            uint[] buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(size);
+                            Color[] buffer = new Color[size];
+                            sbyte[] allZ = new sbyte[size];
 
-                            try
+                            int bx, by, mapX, mapY, x, y;
+
+
+                            for (bx = 0; bx < fixedWidth; ++bx)
                             {
-                                int bx, by, mapX, mapY, x, y;
+                                mapX = bx << 3;
 
-                                for (bx = 0; bx < fixedWidth; ++bx)
+                                for (by = 0; by < fixedHeight; ++by)
                                 {
-                                    mapX = bx << 3;
-
-                                    for (by = 0; by < fixedHeight; ++by)
+                                    while( World.Map == null)
                                     {
-                                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                                        Task.Delay(50);
+                                    }
+                                    ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
-                                        if (indexMap.MapAddress == 0)
+                                    if (indexMap.MapAddress == 0)
+                                    {
+                                        continue;
+                                    }
+
+                                    MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
+                                    MapCells* cells = (MapCells*) &mapBlock->Cells;
+
+                                    mapY = by << 3;
+
+                                    for (y = 0; y < 8; ++y)
+                                    {
+                                        int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+
+                                        int pos = y << 3;
+
+                                        for (x = 0; x < 8; ++x, ++pos, ++block)
                                         {
-                                            continue;
+                                            ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
+
+                                            ref Color cc = ref buffer[block];
+                                            cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+
+                                            allZ[block] = cells[pos].Z;
                                         }
+                                    }
 
-                                        MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
-                                        MapCells* cells = (MapCells*)&mapBlock->Cells;
 
-                                        mapY = by << 3;
+                                    StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
-                                        for (y = 0; y < 8; ++y)
+                                    if (sb != null)
+                                    {
+                                        int count = (int) indexMap.StaticCount;
+
+                                        for (int c = 0; c < count; ++c, ++sb)
                                         {
-                                            int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
-
-                                            int pos = y << 3;
-
-                                            for (x = 0; x < 8; ++x, ++pos, ++block)
+                                            if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                                             {
-                                                ushort color = (ushort)(0x8000 | HuesLoader.Instance.GetRadarColorData(cells[pos].TileID & 0x3FFF));
+                                                int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
 
-                                                buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-                                                allZ[block] = cells[pos].Z;
-                                            }
-                                        }
-
-
-                                        StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
-
-                                        if (sb != null)
-                                        {
-                                            int count = (int)indexMap.StaticCount;
-
-                                            for (int c = 0; c < count; ++c, ++sb)
-                                            {
-                                                if (sb->Color != 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
+                                                if (sb->Z >= allZ[block])
                                                 {
-                                                    int block = (mapY + sb->Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + sb->X + OFFSET_PIX_HALF;
+                                                    ushort color = (ushort) (0x8000 | (sb->Hue != 0 ? HuesLoader.Instance.GetColor16(16384, sb->Hue) : HuesLoader.Instance.GetRadarColorData(sb->Color + 0x4000)));
 
-                                                    if (sb->Z >= allZ[block])
-                                                    {
-                                                        ushort color = (ushort)(0x8000 | (sb->Hue != 0 ? HuesLoader.Instance.GetColor16(16384, sb->Hue) : HuesLoader.Instance.GetRadarColorData(sb->Color + 0x4000)));
+                                                    ref Color cc = ref buffer[block];
+                                                    cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
 
-                                                        buffer[block] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
-                                                        allZ[block] = sb->Z;
-                                                    }
+                                                    allZ[block] = sb->Z;
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            }
 
-                                int real_width_less_one = realWidth - 1;
-                                int real_height_less_one = realHeight - 1;
-                                const float MAG_0 = 80f / 100f;
-                                const float MAG_1 = 100f / 80f;
+                            int real_width_less_one = realWidth - 1;
+                            int real_height_less_one = realHeight - 1;
+                            const float MAG_0 = 80f / 100f;
+                            const float MAG_1 = 100f / 80f;
 
-                                for (mapY = 1; mapY < real_height_less_one; ++mapY)
+                            int mapY_plus_one;
+                            int r, g, b;
+
+                            for (mapY = 1; mapY < real_height_less_one; ++mapY)
+                            {
+                                mapY_plus_one = mapY + 1;
+
+                                for (mapX = 1; mapX < real_width_less_one; ++mapX)
                                 {
-                                    int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
-                                    int blockNext = (mapY + 1 + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + OFFSET_PIX_HALF;
+                                    int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
-                                    for (mapX = 1; mapX < real_width_less_one; ++mapX)
+                                    int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
+
+                                    ref sbyte z0 = ref allZ[blockCurrent];
+                                    ref sbyte z1 = ref allZ[blockNext];
+
+                                    if (z0 == z1)
                                     {
-                                        sbyte z0 = allZ[++blockCurrent];
-                                        sbyte z1 = allZ[blockNext++];
+                                        continue;
+                                    }
 
-                                        if (z0 == z1)
+                                    ref Color cc = ref buffer[blockCurrent];
+
+                                    if (cc.R != 0 || cc.G != 0 || cc.B != 0)
+                                    {
+                                        if (z0 < z1)
                                         {
-                                            continue;
+                                            r = (int) (cc.R * MAG_0);
+                                            g = (int) (cc.G * MAG_0);
+                                            b = (int) (cc.B * MAG_0);
+                                        }
+                                        else
+                                        {
+                                            r = (int) (cc.R * MAG_1);
+                                            g = (int) (cc.G * MAG_1);
+                                            b = (int) (cc.B * MAG_1);
                                         }
 
-                                        ref uint cc = ref buffer[blockCurrent];
-
-                                        byte r = (byte) (cc & 0xFF);        
-                                        byte g = (byte)((cc >> 8) & 0xFF);  
-                                        byte b = (byte)((cc >> 16) & 0xFF); 
-                                        byte a = (byte)((cc >> 24) & 0xFF); 
-
-                                        if (r != 0 || g != 0 || b != 0)
+                                        if (r > 255)
                                         {
-                                            if (z0 < z1)
-                                            {
-                                                r = (byte)Math.Min(0xFF, r * MAG_0);
-                                                g = (byte)Math.Min(0xFF, g * MAG_0);
-                                                b = (byte)Math.Min(0xFF, b * MAG_0);
-                                            }
-                                            else
-                                            {
-                                                r = (byte)Math.Min(0xFF, r * MAG_1);
-                                                g = (byte)Math.Min(0xFF, g * MAG_1);
-                                                b = (byte)Math.Min(0xFF, b * MAG_1);
-                                            }
-
-                                            cc = (uint) (r | (g << 8) | (b << 16) | (a << 24));
+                                            r = 255;
                                         }
+
+                                        if (g > 255)
+                                        {
+                                            g = 255;
+                                        }
+
+                                        if (b > 255)
+                                        {
+                                            b = 255;
+                                        }
+
+                                        cc.R = (byte) r;
+                                        cc.G = (byte) g;
+                                        cc.B = (byte) b;
                                     }
                                 }
-
-                                if (OFFSET_PIX > 0)
-                                {
-                                    realWidth += OFFSET_PIX;
-                                    realHeight += OFFSET_PIX;
-                                }
-
-                                if (_mapTexture == null || _mapTexture.IsDisposed)
-                                {
-                                    _mapTexture = new UOTexture(realWidth, realHeight);
-                                }
-                                
-                                _mapTexture.SetData(buffer, 0, realWidth * realHeight);
                             }
-                            finally
+
+                            if (OFFSET_PIX > 0)
                             {
-                                System.Buffers.ArrayPool<sbyte>.Shared.Return(allZ);
-                                System.Buffers.ArrayPool<uint>.Shared.Return(buffer);
+                                realWidth += OFFSET_PIX;
+                                realHeight += OFFSET_PIX;
                             }
+
+                            _mapTexture = new UOTexture(realWidth, realHeight);
+                            _mapTexture.SetData(buffer);
                         }
                         catch (Exception ex)
                         {
-                            Log.Error($"error loading worldmap: {ex}");
                         }
 
 
@@ -1527,6 +1529,24 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
+        private Color getColor(uint serial) /* giga487, funzione che genera il colore della scritta sulla mappa */
+        {
+            if(World.Guild.Contains(serial))
+            {
+                return Color.Lime;
+            }
+            else if(World.Party.Contains(serial))
+            {
+                return Color.Yellow;
+            }
+            else
+            {
+                return Color.Aqua;
+            }
+
+
+        }
+
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
             if (_showMarkers && _mapMarkersLoaded)
@@ -1604,14 +1624,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showMobiles)
             {
-                foreach (Mobile mob in World.Mobiles.Values)
+                foreach (Mobile mob in World.Mobiles)
                 {
                     if (mob == World.Player)
                     {
                         continue;
                     }
 
-                    if (mob.NotorietyFlag != NotorietyFlag.Ally)
+                    if (mob.NotorietyFlag != NotorietyFlag.Ally) // TUTTO?
                     {
                         DrawMobile
                         (
@@ -1677,7 +1697,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-
+            
             foreach (WMapEntity wme in World.WMapManager.Entities.Values)
             {
                 if (wme.IsGuild && !World.Party.Contains(wme.Serial))
@@ -1694,9 +1714,10 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
             }
-
+            
             if (_showPartyMembers)
             {
+
                 for (int i = 0; i < 10; i++)
                 {
                     PartyMember partyMember = World.Party.Members[i];
@@ -1704,6 +1725,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (partyMember != null && SerialHelper.IsValid(partyMember.Serial))
                     {
                         Mobile mob = World.Mobiles.Get(partyMember.Serial);
+
+                        if(partyMember.Serial != null && mob == null)
+                        {
+                            World.WMapManager.RequestServerPartyGuildInfo(true);
+                        }
 
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
@@ -1713,7 +1739,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (string.IsNullOrEmpty(wme.Name) && !string.IsNullOrEmpty(partyMember.Name))
                                 {
-                                    wme.Name = partyMember.Name;
+                                wme.Name = partyMember.Name;
                                 }
                             }
 
@@ -1734,6 +1760,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
+
                             WMapEntity wme = World.WMapManager.GetEntity(partyMember.Serial);
 
                             if (wme != null && !wme.IsGuild)
@@ -1752,7 +1779,9 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 }
+
             }
+
 
             DrawMobile
             (
@@ -2123,6 +2152,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
+
         private void DrawMulti
         (
             UltimaBatcher2D batcher,
@@ -2181,6 +2211,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _flipMap ? 45f : 0f
             );
         }
+
 
         private void DrawWMEntity
         (

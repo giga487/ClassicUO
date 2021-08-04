@@ -34,16 +34,15 @@ using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect
     {
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
-            hueVec = Vector3.Zero;
+            ResetHueVector();
 
             ushort hue = Hue;
 
@@ -56,8 +55,8 @@ namespace ClassicUO.Game.GameObjects
                 hue = Constants.DEAD_RANGE_COLOR;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, false, 0);
-            hueVec.Y = ShaderHueTranslator.SHADER_LIGHTS;
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, false, 0);
+            HueVector.Y = ShaderHueTranslator.SHADER_LIGHTS;
 
             //Engine.DebugInfo.EffectsRendered++;
 
@@ -74,7 +73,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGraphic,
                 posX,
                 posY,
-                ref hueVec
+                ref HueVector
             );
 
             batcher.SetBlendState(null);

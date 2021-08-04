@@ -39,7 +39,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -55,9 +54,10 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
-            hueVec = Vector3.Zero;
+            ResetHueVector();
 
             AnimationsLoader.SittingInfoData seatData = AnimationsLoader.SittingInfoData.Empty;
             _equipConvData = null;
@@ -87,13 +87,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (AlphaHue != 255)
             {
-                hueVec.Z = 1f - AlphaHue / 255f;
+                HueVector.Z = 1f - AlphaHue / 255f;
             }
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && ReferenceEquals(SelectedObject.LastObject, this))
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
-                hueVec.Y = 1;
+                HueVector.Y = 1;
             }
             else if (SelectedObject.HealthbarObject == this)
             {
@@ -102,12 +102,12 @@ namespace ClassicUO.Game.GameObjects
             else if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 _viewHue = Constants.OUT_RANGE_COLOR;
-                hueVec.Y = 1;
+                HueVector.Y = 1;
             }
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 _viewHue = Constants.DEAD_RANGE_COLOR;
-                hueVec.Y = 1;
+                HueVector.Y = 1;
             }
             else if (IsHidden)
             {
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             bool isAttack = Serial == TargetManager.LastAttack;
-            bool isUnderMouse = TargetManager.IsTargeting && ReferenceEquals(SelectedObject.LastObject, this);
+            bool isUnderMouse = TargetManager.IsTargeting && SelectedObject.LastObject == this;
 
             if (Serial != World.Player.Serial)
             {
@@ -183,7 +183,6 @@ namespace ClassicUO.Game.GameObjects
                             null,
                             drawX,
                             drawY + 10,
-                            ref hueVec,
                             IsFlipped,
                             animIndex,
                             true,
@@ -191,7 +190,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroup,
                             dir,
                             isHuman,
-                            alpha: hueVec.Z
+                            alpha: HueVector.Z
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
@@ -203,7 +202,6 @@ namespace ClassicUO.Game.GameObjects
                             mount,
                             drawX,
                             drawY,
-                            ref hueVec,
                             IsFlipped,
                             animIndex,
                             true,
@@ -211,7 +209,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroupMount,
                             dir,
                             isHuman,
-                            alpha: hueVec.Z
+                            alpha: HueVector.Z
                         );
                     }
                     else
@@ -226,7 +224,6 @@ namespace ClassicUO.Game.GameObjects
                         mount,
                         drawX,
                         drawY,
-                        ref hueVec,
                         IsFlipped,
                         animIndex,
                         false,
@@ -235,7 +232,7 @@ namespace ClassicUO.Game.GameObjects
                         dir,
                         isHuman,
                         isMount: true,
-                        alpha: hueVec.Z
+                        alpha: HueVector.Z
                     );
                 }
             }
@@ -289,7 +286,6 @@ namespace ClassicUO.Game.GameObjects
                         null,
                         drawX,
                         drawY,
-                        ref hueVec,
                         IsFlipped,
                         animIndex,
                         true,
@@ -297,7 +293,7 @@ namespace ClassicUO.Game.GameObjects
                         animGroup,
                         dir,
                         isHuman,
-                        alpha: hueVec.Z
+                        alpha: HueVector.Z
                     );
                 }
             }
@@ -309,7 +305,6 @@ namespace ClassicUO.Game.GameObjects
                 null,
                 drawX,
                 drawY,
-                ref hueVec,
                 IsFlipped,
                 animIndex,
                 false,
@@ -317,7 +312,7 @@ namespace ClassicUO.Game.GameObjects
                 animGroup,
                 dir,
                 isHuman,
-                alpha: hueVec.Z,
+                alpha: HueVector.Z,
                 forceUOP: isGargoyle
             );
 
@@ -424,7 +419,6 @@ namespace ClassicUO.Game.GameObjects
                                 item,
                                 drawX,
                                 drawY,
-                                ref hueVec,
                                 IsFlipped, 
                                 animIndex,
                                 false,
@@ -435,7 +429,7 @@ namespace ClassicUO.Game.GameObjects
                                 false,
                                 false,
                                 isGargoyle,
-                                hueVec.Z
+                                HueVector.Z
                             );
                         }
                         else
@@ -506,7 +500,6 @@ namespace ClassicUO.Game.GameObjects
             Item entity,
             int x,
             int y,
-            ref Vector3 hueVec,
             bool mirror,
             sbyte frameIndex,
             bool hasShadow,
@@ -634,8 +627,8 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    hueVec = Vector3.Zero;
-                    ShaderHueTranslator.GetHueVector(ref hueVec, hue, partialHue, alpha);
+                    ResetHueVector();
+                    ShaderHueTranslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 
                     // this is an hack to make entities partially hued. OG client seems to ignore this.
                     /*if (entity != null && entity.ItemData.AnimID == 0 && entity.ItemData.IsLight)
@@ -759,7 +752,7 @@ namespace ClassicUO.Game.GameObjects
                             h3mod,
                             h6mod,
                             h9mod,
-                            ref hueVec
+                            ref HueVector
                         );
                     }
                     else if (frame != null)
@@ -770,7 +763,7 @@ namespace ClassicUO.Game.GameObjects
                             x,
                             y,
                             mirror,
-                            ref hueVec
+                            ref HueVector
                         );
 
                         int yy = -(frame.Height + frame.CenterY + 3);
@@ -802,8 +795,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-
-                    if (AnimationsLoader.Instance.PixelCheck(id, animGroup, dir, direction.IsUOP, frameIndex, mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
                     {
                         SelectedObject.Object = owner;
                     }
@@ -893,7 +885,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412 && robe.Graphic != 0xA2CA)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
                     {
                         return true;
                     }

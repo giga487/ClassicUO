@@ -84,16 +84,6 @@ namespace ClassicUO.Game.Managers
                     TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
                 }
             );
-
-
-            Register
-            (
-                "debug",
-                s =>
-                {
-                    CUOEnviroment.Debug = !CUOEnviroment.Debug;
-                }
-            );
         }
 
 

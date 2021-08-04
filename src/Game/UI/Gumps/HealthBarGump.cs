@@ -493,8 +493,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                _hpLineRed.IsVisible = entity.HitsMax > 0;
-
                 Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead && ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead
@@ -1690,8 +1688,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                _hpLineRed.IsVisible = entity.HitsMax > 0;
-
                 Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead && ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead

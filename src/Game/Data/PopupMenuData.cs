@@ -30,7 +30,6 @@
 
 #endregion
 
-using ClassicUO.IO;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Data
@@ -49,12 +48,12 @@ namespace ClassicUO.Game.Data
 
         public PopupMenuItem this[int i] => Items[i];
 
-        public static PopupMenuData Parse(ref StackDataReader p)
+        public static PopupMenuData Parse(ref PacketBufferReader p)
         {
-            ushort mode = p.ReadUInt16BE();
+            ushort mode = p.ReadUShort();
             bool isNewCliloc = mode >= 2;
-            uint serial = p.ReadUInt32BE();
-            byte count = p.ReadUInt8();
+            uint serial = p.ReadUInt();
+            byte count = p.ReadByte();
             PopupMenuItem[] items = new PopupMenuItem[count];
 
             for (int i = 0; i < count; i++)
@@ -65,15 +64,15 @@ namespace ClassicUO.Game.Data
 
                 if (isNewCliloc)
                 {
-                    cliloc = (int) p.ReadUInt32BE();
-                    index = p.ReadUInt16BE();
-                    flags = p.ReadUInt16BE();
+                    cliloc = (int) p.ReadUInt();
+                    index = p.ReadUShort();
+                    flags = p.ReadUShort();
                 }
                 else
                 {
-                    index = p.ReadUInt16BE();
-                    cliloc = p.ReadUInt16BE() + 3000000;
-                    flags = p.ReadUInt16BE();
+                    index = p.ReadUShort();
+                    cliloc = p.ReadUShort() + 3000000;
+                    flags = p.ReadUShort();
 
                     if ((flags & 0x84) != 0)
                     {
@@ -87,7 +86,7 @@ namespace ClassicUO.Game.Data
 
                     if ((flags & 0x20) != 0)
                     {
-                        replaced = (ushort) (p.ReadUInt16BE() );
+                        replaced = (ushort) (p.ReadUShort() );
                     }
                 }
 

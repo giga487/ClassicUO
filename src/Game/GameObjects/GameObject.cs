@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
                     return ushort.MaxValue;
                 }
 
-                if (ReferenceEquals(this, World.Player))
+                if (this == World.Player)
                 {
                     return 0;
                 }

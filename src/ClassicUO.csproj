@@ -1,23 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net472</TargetFramework>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
-
-    <PlatformTarget>x64</PlatformTarget>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-
-    <Company>ClassicUO</Company>
-    <Authors>KaRaShO'</Authors>
-    <AssemblyVersion>0.1.9.0</AssemblyVersion>
-    <FileVersion>0.1.9.0</FileVersion>
-    <Copyright>ClassicUO</Copyright>
-    <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
-    <Description>An open source implementation of the Ultima Online Classic Client.</Description>
   </PropertyGroup>
 
 
@@ -28,15 +14,38 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>$(ProjectDir)..\bin\Release\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>..\bin\Release\</OutputPath>
     <PublishDir>$(ProjectDir)..\bin\dist\</PublishDir>
     <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>$(ProjectDir)..\bin\Debug\</OutputPath>
   </PropertyGroup>
 
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>ClassicUO</Company>
+    <Authors>KaRaShO'</Authors>
+    <AssemblyVersion>0.1.8.0</AssemblyVersion>
+    <FileVersion>0.1.8.0</FileVersion>
+    <Copyright>ClassicUO</Copyright>
+    <PackageProjectUrl>https://www.classicuo.eu/</PackageProjectUrl>
+    <Description>An open source implementation of the Ultima Online Classic Client.</Description>
+  </PropertyGroup>
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
@@ -47,6 +56,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />
+    <EmbeddedResource Include="gumpsLowRes.xml" />
+    <EmbeddedResource Include="profile.json" />
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
@@ -59,31 +70,28 @@
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Reference Include="cuoapi">
+      <HintPath>..\external\api\cuoapi.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\external\FNA\FNA.Core.csproj" />
-    <ProjectReference Include="..\external\MP3Sharp\MP3Sharp\MP3Sharp.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="cuoapi">
-      <HintPath>..\external\cuoapi\cuoapi.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\ResErrorMessages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -102,6 +110,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\ResErrorMessages.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ResErrorMessages.Designer.cs</LastGenOutput>
@@ -116,12 +128,36 @@
     </EmbeddedResource>
   </ItemGroup>
 
+
   <ItemGroup>
     <DataFiles_x64 Include="$(ProjectDir)..\external\x64\*.*" />
     <DataFiles_lib64 Include="$(ProjectDir)..\external\lib64\*.*" />
     <DataFiles_osx Include="$(ProjectDir)..\external\osx\*.*" />
     <DataFiles_vulkan Include="$(ProjectDir)..\external\vulkan\icd.d\*.*" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <None Remove="gumps4k.xml" />
+    <None Remove="gumpsLowRes.xml" />
+    <None Remove="profile.json" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>4</VersionMinor>
+      <VersionMajor>2</VersionMajor>
+      <Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
+    </COMReference>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Include="gumps4k.xml" />
+  </ItemGroup>
+
 
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
@@ -145,3 +181,4 @@
   </Target>
 
 </Project>
+

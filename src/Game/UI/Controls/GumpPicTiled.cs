@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            return GumpsLoader.Instance.PixelCheck(Graphic, x, y);
+            return texture.Contains(x, y);
         }
     }
 }

@@ -35,9 +35,9 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using System.Linq;
 
 namespace ClassicUO.Game.Managers
 {
@@ -49,28 +49,99 @@ namespace ClassicUO.Game.Managers
         public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
-        public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
+        public int getIndex(uint serial)
+        {
+            return Array.FindIndex(Members, s => s != null && s.Serial == serial);
+        }
 
+
+        public int getSelfIndex()
+        {
+            return Array.FindIndex(Members, s => s != null && s.Serial == World.Player.Serial);
+        }
+
+        public int firstFreeIndex()
+        {
+           return Array.FindIndex(Members, s => s == null);           
+        }
+        public PartyMember[] Members { get; set;} = new PartyMember[PARTY_SIZE];
+
+        public bool ResetArrayWithouthSelf()
+        {
+
+            for (int i = 0; i < PARTY_SIZE; i++)
+            {
+                if((Members[i] == null) || i == getSelfIndex()) continue;
+
+                Members[i] = null;
+            }
+
+            return true;
+
+        }
+
+        public bool InsertPartyElement(uint serial, string name) //inserisce l'elemento del party libero
+        {           
+
+            if(World.Party.Contains(serial) && Members[getIndex(serial)].Name == null)
+            {
+                Members[getIndex(serial)] = new PartyMember(serial, name);
+            }
+            if(!Contains(serial))
+            {
+                int firstIndexToFill = firstFreeIndex();
+
+                if(firstIndexToFill > -1)
+                {
+                    Members[firstIndexToFill] = new PartyMember(serial, name);
+                }
+            }
+
+            return true;
+        }
 
         public long PartyHealTimer { get; set; }
         public uint PartyHealTarget { get; set; }
 
-        public void ParsePacket(ref StackDataReader p)
+        public void ParsePacket(ref PacketBufferReader p)
         {
-            byte code = p.ReadUInt8();
-
+            byte code = p.ReadByte();
+            bool partyGiga487 = false;
             bool add = false;
-
+            byte count = 0;
             switch (code)
             {
                 case 1:
                     add = true;
-                    goto case 2;
+
+                    if (!partyGiga487)
+                        goto case 2; //giga487, trovo molto confuso questa parte di codice, la riscrivo.
+                    else
+                    {
+                        count = p.ReadByte();
+
+                        if (count <= 1)
+                        {
+
+                        }
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            uint serial = p.ReadUInt();
+                            //InsertPartyElement(serial, wme.Name); //inserisce l'elemento del party libero
+                            Members[i] = new PartyMember(serial);
+                        }
+
+                    }
+
+
+
+                    break;
 
                 case 2:
-                    byte count = p.ReadUInt8();
+                    count = p.ReadByte();
 
-                    if (count <= 1)
+                    if (count <= 1) //se ho 2 elementi e ne rimuovo uno
                     {
                         Leader = 0;
                         Inviter = 0;
@@ -109,7 +180,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!add)
                     {
-                        to_remove = p.ReadUInt32BE();
+                        to_remove = p.ReadUInt();
 
                         UIManager.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
@@ -119,7 +190,7 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < count; i++)
                     {
-                        uint serial = p.ReadUInt32BE();
+                        uint serial = p.ReadUInt();
                         bool remove = !add && serial == to_remove;
 
                         if (remove && serial == to_remove && i == 0)
@@ -175,13 +246,13 @@ namespace ClassicUO.Game.Managers
 
 
                     UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
-
+                    NetClient.Socket.Send(new PQueryPartyPosition());
                     break;
 
                 case 3:
-                case 4:
-                    uint ser = p.ReadUInt32BE();
-                    string name = p.ReadUnicodeBE();
+                case 4: /* questo è il messaggio di chat */
+                    uint ser = p.ReadUInt();
+                    string name = p.ReadUnicode();
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
@@ -205,7 +276,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case 7:
-                    Inviter = p.ReadUInt32BE();
+                    Inviter = p.ReadUInt();
 
                     if (ProfileManager.CurrentProfile.PartyInviteGump)
                     {
@@ -253,6 +324,13 @@ namespace ClassicUO.Game.Managers
             _name = Name;
         }
 
+        public PartyMember(uint serial, string PartyMemberName)
+        {
+            Serial = serial;
+            _name = PartyMemberName;
+        }
+
+
         public string Name
         {
             get
@@ -285,4 +363,6 @@ namespace ClassicUO.Game.Managers
 
         public uint Serial;
     }
+
+
 }

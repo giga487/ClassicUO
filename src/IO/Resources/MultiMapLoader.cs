@@ -197,43 +197,29 @@ namespace ClassicUO.IO.Resources
 
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 
-                uint[] colorTable = System.Buffers.ArrayPool<uint>.Shared.Rent(maxPixelValue);
+                uint[] colorTable = new uint[maxPixelValue];
+
+                int colorOffset = 31 * maxPixelValue;
+
+                for (int i = 0; i < maxPixelValue; i++)
+                {
+                    colorOffset -= 31;
+                    colorTable[i] = HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
+                }
+
+                uint[] worldMap = new uint[mapSize];
+
+                for (int i = 0; i < mapSize; i++)
+                {
+                    byte bytepic = data[i];
+
+                    worldMap[i] = bytepic != 0 ? colorTable[bytepic - 1] : 0;
+                }
+
+                Marshal.FreeHGlobal(ptr);
+
                 UOTexture texture = new UOTexture(width, height);
-
-                try
-                {
-                    int colorOffset = 31 * maxPixelValue;
-
-                    for (int i = 0; i < maxPixelValue; i++)
-                    {
-                        colorOffset -= 31;
-                        colorTable[i] = HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]) | 0xFF_00_00_00;
-                    }
-
-                    uint[] worldMap = System.Buffers.ArrayPool<uint>.Shared.Rent(mapSize);
-
-                    try
-                    {
-                        for (int i = 0; i < mapSize; i++)
-                        {
-                            byte bytepic = data[i];
-
-                            worldMap[i] = bytepic != 0 ? colorTable[bytepic - 1] : 0;
-                        }
-
-                        texture.SetData(worldMap, 0, width * height);
-                    }
-                    finally
-                    {
-                        System.Buffers.ArrayPool<uint>.Shared.Return(worldMap, true);
-                    }
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(ptr);
-
-                    System.Buffers.ArrayPool<uint>.Shared.Return(colorTable, true);
-                }
+                texture.PushData(worldMap);
 
                 return texture;
             }
@@ -277,42 +263,34 @@ namespace ClassicUO.IO.Resources
             int pwidth = endX - startX;
             int pheight = endY - startY;
 
-            uint[] map = System.Buffers.ArrayPool<uint>.Shared.Rent(pwidth * pheight);
-            UOTexture texture = new UOTexture(pwidth, pheight);
+            uint[] map = new uint[pwidth * pheight];
 
-            try
+            for (int y = 0; y < h; y++)
             {
-                for (int y = 0; y < h; y++)
+                int x = 0;
+
+                int colorCount = _facets[facet].ReadInt() / 3;
+
+                for (int i = 0; i < colorCount; i++)
                 {
-                    int x = 0;
+                    int size = _facets[facet].ReadByte();
 
-                    int colorCount = _facets[facet].ReadInt() / 3;
+                    uint color = HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
 
-                    for (int i = 0; i < colorCount; i++)
+                    for (int j = 0; j < size; j++)
                     {
-                        int size = _facets[facet].ReadByte();
-
-                        uint color = HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
-
-                        for (int j = 0; j < size; j++)
+                        if (x >= startX && x < endX && y >= startY && y < endY)
                         {
-                            if (x >= startX && x < endX && y >= startY && y < endY)
-                            {
-                                map[(y - startY) * pwidth + (x - startX)] = color;
-                            }
-
-                            x++;
+                            map[(y - startY) * pwidth + (x - startX)] = color;
                         }
+
+                        x++;
                     }
                 }
-
-                texture.SetData(map, 0, width * height);
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<uint>.Shared.Return(map, true);
             }
 
+            UOTexture texture = new UOTexture(pwidth, pheight);
+            texture.PushData(map);
 
             return texture;
         }

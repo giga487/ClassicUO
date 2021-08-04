@@ -138,15 +138,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-
-            if (World.Player != null)
+            foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
             {
-                foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
-                {
-                    _box.Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
-                }
+                _box.Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
             }
-            
+
             _background.Graphic = _graphic;
             _background.X = 0;
             _background.Y = 0;

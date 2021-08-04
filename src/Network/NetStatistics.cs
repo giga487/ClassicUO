@@ -114,7 +114,7 @@ namespace ClassicUO.Network
             }
 
             _pingStopwatch.Restart();
-            _socket.Send_Ping();
+            _socket.Send(new PPing());
         }
 
         public void Reset()

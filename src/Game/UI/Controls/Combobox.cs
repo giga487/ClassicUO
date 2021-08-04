@@ -32,7 +32,6 @@
 
 using System;
 using System.Linq;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -81,16 +80,9 @@ namespace ClassicUO.Game.UI.Controls
 
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
-
-            bool unicode = isAsianLang;
-            byte font1 = (byte)(isAsianLang ? 1 : _font);
-
             Add
             (
-                _label = new Label(initialText, unicode, 0x0453, font: font1)
+                _label = new Label(initialText, false, 0x0453, font: _font)
                 {
                     X = 2, Y = 5
                 }
@@ -205,13 +197,6 @@ namespace ClassicUO.Game.UI.Controls
 
                 HoveredLabel[] labels = new HoveredLabel[items.Length];
 
-                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
-                    string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
-
-                bool unicode = isAsianLang;
-                byte font1 = (byte)(isAsianLang ? 1 : font);
-
                 for (int i = 0; i < items.Length; i++)
                 {
                     string item = items[i];
@@ -224,11 +209,11 @@ namespace ClassicUO.Game.UI.Controls
                     HoveredLabel label = new HoveredLabel
                     (
                         item,
-                        unicode,
+                        false,
                         0x0453,
                         0x0453,
                         0x0453,
-                        font: font1
+                        font: font
                     )
                     {
                         X = 2,

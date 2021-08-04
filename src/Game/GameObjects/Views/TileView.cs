@@ -32,13 +32,12 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Land
     {
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
@@ -47,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
 
             //Engine.DebugInfo.LandsRendered++;
 
-            hueVec = Vector3.Zero;
+            ResetHueVector();
 
             ushort hue = Hue;
 
@@ -67,12 +66,12 @@ namespace ClassicUO.Game.GameObjects
 
             if (hue != 0)
             {
-                hueVec.X = hue - 1;
-                hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND_HUED : ShaderHueTranslator.SHADER_HUED;
+                HueVector.X = hue - 1;
+                HueVector.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND_HUED : ShaderHueTranslator.SHADER_HUED;
             }
             else
             {
-                hueVec.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
+                HueVector.Y = IsStretched ? ShaderHueTranslator.SHADER_LAND : ShaderHueTranslator.SHADER_NONE;
             }
 
             if (IsStretched)
@@ -85,15 +84,15 @@ namespace ClassicUO.Game.GameObjects
                     Graphic,
                     posX,
                     posY,
-                    ref YOffsets,
-                    ref NormalTop,
-                    ref NormalRight,
-                    ref NormalLeft,
-                    ref NormalBottom,
-                    ref hueVec
+                    ref Rectangle,
+                    ref Normal0,
+                    ref Normal1,
+                    ref Normal2,
+                    ref Normal3,
+                    ref HueVector
                 );
 
-                if (SelectedObject.IsPointInStretchedLand(ref YOffsets, posX, posY))
+                if (SelectedObject.IsPointInStretchedLand(ref Rectangle, posX, posY))
                 {
                     SelectedObject.Object = this;
                 }
@@ -106,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
                     Graphic,
                     posX,
                     posY,
-                    ref hueVec
+                    ref HueVector
                 );
 
                 if (SelectedObject.IsPointInLand(posX, posY))

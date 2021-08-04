@@ -44,7 +44,6 @@ namespace ClassicUO.IO.Resources
     {
         private static GumpsLoader _instance;
         private UOFile _file;
-        private PixelPicker _picker = new PixelPicker();
 
         private GumpsLoader(int count) : base(count)
         {
@@ -146,10 +145,17 @@ namespace ClassicUO.IO.Resources
 
             if (texture == null || texture.IsDisposed)
             {
-                if (GetGumpPixels(ref texture, g))
+                uint[] pixels = GetGumpPixels(g, out int w, out int h);
+
+                if (pixels == null || pixels.Length == 0)
                 {
-                    SaveId(g);
+                    return null;
                 }
+
+                texture = new UOTexture(w, h);
+                texture.PushData(pixels);
+
+                SaveId(g);
             }
             else
             {
@@ -159,25 +165,25 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public bool PixelCheck(int index, int x, int y)
-        {
-            return _picker.Get((ulong) index, x, y);
-        }
-
-        private unsafe bool GetGumpPixels(ref UOTexture texture, uint index)
+        private unsafe uint[] GetGumpPixels(uint index, out int width, out int height)
         {
             ref UOFileIndex entry = ref GetValidRefEntry((int) index);
 
             if (entry.Width <= 0 && entry.Height <= 0)
             {
-                return false;
+                width = 0;
+                height = 0;
+
+                return null;
             }
 
+            width = entry.Width;
+            height = entry.Height;
             ushort color = entry.Hue;
 
-            if (entry.Width == 0 || entry.Height == 0)
+            if (width == 0 || height == 0)
             {
-                return false;
+                return null;
             }
 
             _file.SetData(entry.Address, entry.FileSize);
@@ -185,64 +191,51 @@ namespace ClassicUO.IO.Resources
 
             IntPtr dataStart = _file.PositionAddress;
 
-            uint[] pixels = System.Buffers.ArrayPool<uint>.Shared.Rent(entry.Width * entry.Height);
+            uint[] pixels = new uint[width * height];
+            int* lookuplist = (int*) dataStart;
 
-            try
+            int gsize;
+
+            for (int y = 0, half_len = entry.Length >> 2; y < height; y++)
             {
-                int* lookuplist = (int*)dataStart;
-
-                int gsize;
-
-                for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
+                if (y < height - 1)
                 {
-                    if (y < entry.Height - 1)
-                    {
-                        gsize = lookuplist[y + 1] - lookuplist[y];
-                    }
-                    else
-                    {
-                        gsize = half_len - lookuplist[y];
-                    }
-
-                    GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
-
-                    int pos = y * entry.Width;
-
-                    for (int i = 0; i < gsize; i++)
-                    {
-                        uint val = gmul[i].Value;
-
-                        if (color != 0 && val != 0)
-                        {
-                            val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
-                        }
-
-                        if (val != 0)
-                        {
-                            //val = 0x8000 | val;
-                            val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
-                        }
-
-                        int count = gmul[i].Run;
-
-                        for (int j = 0; j < count; j++)
-                        {
-                            pixels[pos++] = val;
-                        }
-                    }
+                    gsize = lookuplist[y + 1] - lookuplist[y];
+                }
+                else
+                {
+                    gsize = half_len - lookuplist[y];
                 }
 
-                texture = new UOTexture(entry.Width, entry.Height);
-                texture.SetData(pixels, 0, entry.Width * entry.Height);
+                GumpBlock* gmul = (GumpBlock*) (dataStart + (lookuplist[y] << 2));
 
-                _picker.Set(index, entry.Width, entry.Height, pixels);
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<uint>.Shared.Return(pixels, true);
+                int pos = y * width;
+
+                for (int i = 0; i < gsize; i++)
+                {
+                    uint val = gmul[i].Value;
+
+                    if (color != 0 && val != 0)
+                    {
+                        val = HuesLoader.Instance.GetColor16(gmul[i].Value, color);
+                    }
+
+                    if (val != 0)
+                    {
+                        //val = 0x8000 | val;
+                        val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
+                    }
+
+                    int count = gmul[i].Run;
+
+                    for (int j = 0; j < count; j++)
+                    {
+                        pixels[pos++] = val;
+                    }
+                }
             }
 
-            return true;
+            return pixels;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

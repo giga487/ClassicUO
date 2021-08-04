@@ -405,11 +405,11 @@ namespace ClassicUO.IO.Resources
             BlockData[0][block].StaticCount = BlockData[0][block].OriginalStaticCount = count;
         }
 
-        public unsafe bool ApplyPatches(ref StackDataReader reader)
+        public unsafe bool ApplyPatches(ref PacketBufferReader reader)
         {
             ResetPatchesInBlockTable();
 
-            PatchesCount = (int) reader.ReadUInt32BE();
+            PatchesCount = (int) reader.ReadUInt();
 
             if (PatchesCount < 0)
             {
@@ -439,9 +439,9 @@ namespace ClassicUO.IO.Resources
                     continue;
                 }
 
-                int mapPatchesCount = (int) reader.ReadUInt32BE();
+                int mapPatchesCount = (int) reader.ReadUInt();
                 MapPatchCount[i] = mapPatchesCount;
-                int staticPatchesCount = (int) reader.ReadUInt32BE();
+                int staticPatchesCount = (int) reader.ReadUInt();
                 StaticPatchCount[i] = staticPatchesCount;
 
                 int w = MapBlocksSize[i, 0];

@@ -36,7 +36,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -61,14 +60,14 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, ref Vector3 hueVec)
+        public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
             {
                 return false;
             }
 
-            hueVec = Vector3.Zero;
+            ResetHueVector();
 
             ushort hue = Hue;
 
@@ -97,7 +96,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            
+            ResetHueVector();
+
             ushort graphic = Graphic;
             bool partial = ItemData.IsPartialHue;
 
@@ -119,13 +119,13 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            ShaderHueTranslator.GetHueVector(ref hueVec, hue, partial, 0);
+            ShaderHueTranslator.GetHueVector(ref HueVector, hue, partial, 0);
 
             //Engine.DebugInfo.MultiRendered++;
 
             if (IsHousePreview)
             {
-                hueVec.Z = 0.5f;
+                HueVector.Z = 0.5f;
             }
 
             posX += (int) Offset.X;
@@ -133,7 +133,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (AlphaHue != 255)
             {
-                hueVec.Z = 1f - AlphaHue / 255f;
+                HueVector.Z = 1f - AlphaHue / 255f;
             }
 
             DrawStaticAnimated
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic,
                 posX,
                 posY,
-                ref hueVec,
+                ref HueVector,
                 ref DrawTransparent,
                 false
             );
@@ -172,12 +172,7 @@ namespace ClassicUO.Game.GameObjects
                 posX -= index.Width;
                 posY -= index.Height;
 
-                if (ArtLoader.Instance.PixelCheck
-                (
-                    graphic,
-                    SelectedObject.TranslatedMousePositionByViewport.X - posX,
-                    SelectedObject.TranslatedMousePositionByViewport.Y - posY
-                ))
+                if (SelectedObject.IsPointInStatic(ArtLoader.Instance.GetTexture(graphic), posX, posY))
                 {
                     SelectedObject.Object = this;
                 }

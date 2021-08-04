@@ -59,57 +59,19 @@ namespace ClassicUO.Utility.Logging
             logStream.Close();
         }
 
+        public async Task WriteAsync(string logMessage)
+        {
+            byte[] logBytes = Encoding.UTF8.GetBytes($"{logMessage}\n");
+            await logStream.WriteAsync(logBytes, 0, logBytes.Length);
+            await logStream.FlushAsync();
+        }
 
         public void Write(string message)
         {
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(message.Length);
-
-            try
-            {
-                Encoding.UTF8.GetBytes
-                (
-                    message,
-                    0,
-                    message.Length,
-                    buffer,
-                    0
-                );
-
-                logStream.Write(buffer, 0, message.Length);
-                logStream.WriteByte((byte) '\n');
-                logStream.Flush();
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
-            }
+            byte[] logBytes = Encoding.UTF8.GetBytes($"{message}\n");
+            logStream.Write(logBytes, 0, logBytes.Length);
+            logStream.Flush();
         }
-
-        public async Task WriteAsync(string message)
-        {
-            byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(message.Length);
-
-            try
-            {
-                Encoding.UTF8.GetBytes
-                (
-                    message,
-                    0,
-                    message.Length,
-                    buffer,
-                    0
-                );
-
-                await logStream.WriteAsync(buffer, 0, message.Length);
-                logStream.WriteByte((byte) '\n');
-                await logStream.FlushAsync();
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
-            }
-        }
-
 
         public override string ToString()
         {

@@ -249,13 +249,13 @@ namespace ClassicUO.Game.UI.Gumps
                 case 0: // join
                     if (!string.IsNullOrEmpty(_selectedChannelText))
                     {
-                        NetClient.Socket.Send_ChatJoinCommand(_selectedChannelText);
+                        NetClient.Socket.Send(new PChatJoinCommand(_selectedChannelText));
                     }
 
                     break;
 
                 case 1: // leave
-                    NetClient.Socket.Send_ChatLeaveChannelCommand();
+                    NetClient.Socket.Send(new PChatLeaveChannelCommand());
 
                     break;
 
@@ -443,7 +443,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (buttonID == 1) // ok
                 {
-                    NetClient.Socket.Send_ChatCreateChannelCommand(_textBox.Text);
+                    NetClient.Socket.Send(new PChatCreateChannelCommand(_textBox.Text));
                 }
 
                 Dispose();

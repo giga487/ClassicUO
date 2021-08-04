@@ -125,22 +125,34 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Ok:
-                    NetClient.Socket.Send_TextEntryDialogResponse(LocalSerial,
-                                                                  ParentID,
-                                                                  ButtonID,
-                                                                  _textBox.Text,
-                                                                  true);
+                    NetClient.Socket.Send
+                    (
+                        new PTextEntryDialogResponse
+                        (
+                            LocalSerial,
+                            ParentID,
+                            ButtonID,
+                            _textBox.Text,
+                            true
+                        )
+                    );
 
                     Dispose();
 
                     break;
 
                 case ButtonType.Cancel:
-                    NetClient.Socket.Send_TextEntryDialogResponse(LocalSerial,
-                                                                  ParentID,
-                                                                  ButtonID,
-                                                                  _textBox.Text,
-                                                                  false);
+                    NetClient.Socket.Send
+                    (
+                        new PTextEntryDialogResponse
+                        (
+                            LocalSerial,
+                            ParentID,
+                            ButtonID,
+                            _textBox.Text,
+                            false
+                        )
+                    );
 
                     Dispose();
 

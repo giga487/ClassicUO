@@ -30,14 +30,12 @@
 
 #endregion
 
-using System;
 using System.Text;
 using System.Xml;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -47,10 +45,9 @@ namespace ClassicUO.Game.UI.Gumps
         private static Point _last_position = new Point(-1, -1);
 
         private uint _ping, _deltaBytesReceived, _deltaBytesSent;
+        private readonly StringBuilder _sb = new StringBuilder();
         private uint _time_to_update;
         private readonly AlphaBlendControl _trans;
-        private string _cacheText = string.Empty;
-
 
         public NetworkStatsGump(int x, int y) : base(0, 0)
         {
@@ -104,6 +101,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Time.Ticks > _time_to_update)
             {
+                _sb.Clear();
+
                 _time_to_update = Time.Ticks + 100;
 
                 if (!NetClient.Socket.IsConnected)
@@ -119,23 +118,17 @@ namespace ClassicUO.Game.UI.Gumps
                     _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
                 }
 
-                Span<char> span = stackalloc char[128];
-                ValueStringBuilder sb = new ValueStringBuilder(span);
-              
                 if (IsMinimized)
                 {
-                    sb.Append($"Ping: {_ping} ms");
+                    _sb.Append($"Ping: {_ping} ms");
                 }
                 else
                 {
-                    sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+                    _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
                 }
 
-                _cacheText = sb.ToString();
 
-                sb.Dispose();
-
-                Vector2 size = Fonts.Bold.MeasureString(_cacheText);
+                Vector2 size = Fonts.Bold.MeasureString(_sb.ToString());
 
                 _trans.Width = Width = (int) (size.X + 20);
                 _trans.Height = Height = (int) (size.Y + 20);
@@ -174,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawString
             (
                 Fonts.Bold,
-                _cacheText,
+                _sb.ToString(),
                 x + 10,
                 y + 10,
                 ref HueVector

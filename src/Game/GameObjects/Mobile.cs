@@ -105,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Previous = null;
                 mobile.Name = null;
                 
-                mobile.HitsRequest = HitsRequestStatus.None;
+                mobile.HitsRequested = false;
 
                 mobile.CalculateRandomIdleTime();
             }
