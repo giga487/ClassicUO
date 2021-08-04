@@ -37,28 +37,34 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using System.Collections.Generic;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2})\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
-        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
+        private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n";// InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
-        private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
+        private const string DEBUG_STRING_PING = "- Ping: {0} ms\n"; //giga487
+        private const string DEBUG_STRING_PING_SMALL = "- Ping: {0} ms\n";
+
+        private const string DEBUG_STRING_SMALL = "- FPS: {0}\nZoom: {1}";
         private const string DEBUG_STRING_ZOOM = "- Zoom: {0}\n";
-        private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
+        private const string DEBUG_STRING_SMALL_NO_ZOOM = "- FPS: {0}\n";
         private static Point _last_position = new Point(-1, -1);
 
         private uint _timeToUpdate;
         private readonly AlphaBlendControl _alphaBlendControl;
         private string _cacheText = string.Empty;
+        private uint _ping;
 
         public DebugGump(int x, int y) : base(0, 0)
         {
@@ -105,6 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update(double totalTime, double frameTime)
         {
             base.Update(totalTime, frameTime);
+            //_ping = NetClient.Socket.Statistics.Ping;
 
             if (Time.Ticks > _timeToUpdate)
             {
@@ -127,12 +134,15 @@ namespace ClassicUO.Game.UI.Gumps
                          )
                      );
 
-                    sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
+
+                    //sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
+                    sb.Append(string.Format(DEBUG_STRING_PING, _ping));
+                    sb.Append(string.Format(DEBUG_STRING_ZOOM, !World.InGame?1f: scene.Camera.Zoom));
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
                     sb.Append(string.Format(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));
 
-                    sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
+                    //sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
 
                     if (CUOEnviroment.Profiler)
                     {
@@ -174,6 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
+                    sb.Append(string.Format(DEBUG_STRING_PING_SMALL, NetClient.Socket.Statistics.Ping));  /* giga487 */
                 }
 
                 _cacheText = sb.ToString();
