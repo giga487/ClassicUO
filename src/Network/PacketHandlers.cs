@@ -44,6 +44,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
+using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -4652,6 +4653,60 @@ namespace ClassicUO.Network
                     type = p.ReadUInt16BE();
 
 
+                    break;
+                
+                case 0x34: // UoMarsPacketHandler
+
+                    ushort uoMarsPacketsDefiner = p.ReadUInt8();
+                    switch (uoMarsPacketsDefiner)
+                    {
+                        case 0x00:  // Play custom sound
+
+                            string soundPath = p.ReadASCII();
+                            
+                            Profile currentProfile = ProfileManager.CurrentProfile;
+                            if(currentProfile == null)
+                            {
+                                return;
+                            }
+                            
+                            float volume = currentProfile.SoundVolume / Constants.SOUND_DELTA;
+
+                            if (Client.Game.IsActive)
+                            {
+                                if (!currentProfile.ReproduceSoundsInBackground)
+                                {
+                                    volume = currentProfile.SoundVolume / Constants.SOUND_DELTA;
+                                }
+                            }
+                            else if (!currentProfile.ReproduceSoundsInBackground)
+                            {
+                                volume = 0;
+                            }
+
+                            if (volume < -1 || volume > 1f)
+                            {
+                                return;
+                            }
+                            
+                            if (!currentProfile.EnableSound || !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+                            {
+                                volume = 0;
+                            }
+                            
+                            try
+                            {
+                                // full path will be: \UoMarsClient/Music/Digital/UoMars/file.mp3
+                                UOMusic music = new UOMusic(0, soundPath, false, "Music/Digital/UoMars/");
+                                music.Play(volume);
+                            }
+                            catch (Exception e)
+                            {}
+                            
+                            
+                            break;
+                    }
+                    
                     break;
 
                 default:
