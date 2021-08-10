@@ -6558,6 +6558,14 @@ namespace ClassicUO.Network
                 {
                     gump.Add(new Button(gparams), page);
                 }
+                else if (string.Equals(entry, "uomarsbuttoncontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsButtonControl(gparams), page);
+                }
+                else if (string.Equals(entry, "uomarsclickablehtml", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsClickableHtmlControl(gparams, lines), page);
+                }
                 else if (string.Equals(entry, "buttontileart", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.Add(new ButtonTileArt(gparams), page);
@@ -6923,6 +6931,38 @@ namespace ClassicUO.Network
                 else if (string.Equals(entry, "mastergump", StringComparison.InvariantCultureIgnoreCase))
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
+                }
+                else if (string.Equals(entry, "uomarspiccontrol", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    gump.Add(new UoMarsPicControl(gparams), page);
+                }
+                else if (string.Equals(entry, "uomarstooltip", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    string text = gparams.ElementAtOrDefault(1);
+
+                    if (text == null)
+                        text = "";
+                    
+                    Control last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
+
+                    if (last != null)
+                    {
+                        if (last.HasTooltip)
+                        {
+                            if (last.Tooltip is string s)
+                            {
+                                s += '\n' + text;
+                                last.SetTooltip(s);
+                            }
+                        }
+                        else
+                        {
+                            last.SetTooltip(text);
+                        }
+
+                        last.Priority = ClickPriority.High;
+                        last.AcceptMouseInput = true;
+                    }
                 }
                 else
                 {
