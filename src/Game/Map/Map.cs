@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
