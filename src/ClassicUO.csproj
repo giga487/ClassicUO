@@ -21,7 +21,10 @@
     <StartupObject />
   </PropertyGroup>
 
-
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
     <OutputType>WinExe</OutputType>

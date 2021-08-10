@@ -52,6 +52,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
+using ClassicUO.Game.Map;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1057,6 +1058,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     for (by = 0; by < fixedHeight; ++by)
                                     {
+
+                                        Map.Map? mapNullable = World.Map;
+
+                                        
+                                        if(mapNullable is null)
+                                        {
+                                            continue;
+                                        }
+ 
+
                                         ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                                         if (indexMap.MapAddress == 0)
